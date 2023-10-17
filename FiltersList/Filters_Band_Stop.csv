@@ -1,0 +1,11 @@
+Model Number,Case Style,Description,Passband F1 (MHz),Passband F2 (MHz),Stopband F3 (MHz),Rejection @ F3 (dB),Stopband F4 (MHz),Rejection @ F4 (dB),Filter Type,Technology,Interface,Impedance (O)
+BSF-108+,HF1139,"Lumped LC Band Stop Filter, 90-105 MHz",65,140-1000,90,35,105,35,Band Stop,Lumped LC,SMT,50
+BSF-C70+,HU1186,"Lumped LC Band Stop Filter, 56.75-83.25 MHz",DC-37,120-1200,56.75,35,83.25,35,Band Stop,Lumped LC,SMT,50
+BSF-C75+,HU1186,"Lumped LC Band Stop Filter, 65-85 MHz",DC-48,115-1000,65,35,85,35,Band Stop,Lumped LC,SMT,50
+BSF-C125+,HU1186,"Lumped LC Band Stop Filter, 110.25-139.75 MHz",DC-84,196-1000,110.25,35,139.75,35,Band Stop,Lumped LC,SMT,50
+BSF-C140+,HU1186,"Lumped LC Band Stop Filter, 127.25-152.75 MHz",DC - 96,210 - 1000,127.25,35,152.75,35,Band Stop,Lumped LC,SMT,50
+BSF-C160+,HU1186,"Lumped LC Band Stop Filter, 150.3-169.7 MHz",DC-115,-,150.3,35,169.7,35,Band Stop,Lumped LC,SMT,50
+BSF-C4768+,HU1186,"Lumped LC Band Stop Filter, 47-68 MHz",DC-32,95-1200,47,35,68,35,Band Stop,Lumped LC,SMT,50
+BSF-C88108+,HU1186,"Lumped LC Band Stop Filter, 88-108 MHz",DC-66,142-1300,88,35,108,35,Band Stop,Lumped LC,SMT,50
+BSF-C174223+,HU1186,"Lumped LC Band Stop Filter, 174-223 MHz",DC-130,-,174,35,223,35,Band Stop,Lumped LC,SMT,50
+BSP-255310+,GP731,"Lumped LC Band Stop Filter, 262-295 MHz",180,400-1000,262,35,295,35,Band Stop,Lumped LC,SMT,50
