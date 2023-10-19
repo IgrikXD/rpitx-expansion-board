@@ -27,7 +27,7 @@ class RFSwitch(ABC):
         ]
 
     @abstractmethod
-    def enableFilter(self, filter_index):
+    def activateRFOutput(self, filter_index):
         pass
 
     def changeControlSignals(self, gpio_values):
@@ -45,7 +45,7 @@ class SPDTSwitch(RFSwitch):
             2: (LOW, LOW, HIGH)     #RF common to RF2
     }
 
-    def enableFilter(self, filter_index):
+    def activateRFOutput(self, filter_index):
         print(f"Enabling filter {filter_index} on SPDT switch")
 
         try:
@@ -62,7 +62,7 @@ class SP3TSwitch(RFSwitch):
             3: (HIGH, LOW, LOW)     #RF common to RF3
     }
 
-    def enableFilter(self, filter_index):
+    def activateRFOutput(self, filter_index):
         print(f"Enabling filter {filter_index} on SP3T switch")
 
         try:
@@ -80,7 +80,7 @@ class SP4TSwitch(RFSwitch):
             4: (HIGH, LOW, HIGH)    #RF common to RF4
     }
 
-    def enableFilter(self, filter_index):
+    def activateRFOutput(self, filter_index):
         print(f"Enabling filter {filter_index} on SP4T switch")
         
         try:
@@ -100,7 +100,7 @@ class SP6TSwitch(RFSwitch):
             6: (HIGH, LOW, HIGH),   #RF common to RF6
     }
 
-    def enableFilter(self, filter_index):
+    def activateRFOutput(self, filter_index):
         print(f"Enabling filter {filter_index} on SP6T switch")
 
         try:
@@ -132,23 +132,23 @@ class Device:
     def __init__(self, model_name):
         self.model_name = model_name
         self.filters = []
-        self.switch_strategy = None
+        self.switch_type = None
         self.filters_amount = self.DEVICE_TYPE_MAPPING[model_name]
 
     def enableFilter(self, filter_index):
         # The operating strategy is selected when the enableFilter function 
         # is launched for the first time.
-        if (self.switch_strategy == None):
+        if (self.switch_type == None):
             if (self.model_name == self.DEVICES_LIST[0]):
-                self.switch_strategy = SPDTSwitch()
+                self.switch_type = SPDTSwitch()
             elif (self.model_name == self.DEVICES_LIST[1]):
-                self.switch_strategy = SP3TSwitch()
+                self.switch_type = SP3TSwitch()
             elif (self.model_name == self.DEVICES_LIST[2]):
-                self.switch_strategy = SP4TSwitch()
+                self.switch_type = SP4TSwitch()
             elif (self.model_name == self.DEVICES_LIST[3]):
-                self.switch_strategy = SP6TSwitch()
+                self.switch_type = SP6TSwitch()
         
-        return self.switch_strategy.enableFilter(filter_index)
+        return self.switch_type.activateRFOutput(filter_index)
     
     def getConfigurationInfo(self):
         configuration_info = f"{self.CONFIGURATION_INFO_DELIMITER}\nActive board configuration:\n"
