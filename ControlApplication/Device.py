@@ -9,16 +9,9 @@ class SwitchStrategy(ABC):
         pass
 
 class SPDTSwitchStrategy(SwitchStrategy):
-    def __init__(self):
-        GPIO.setmode(GPIO.BCM)
-        self.pins_to_enable = [17, 27, 22]
-        for pin in self.pins_to_enable:
-            GPIO.setup(pin, GPIO.OUT)
-
     def enableFilter(self, filter_index):
         # TODO
         print(f"Enabling filter {filter_index} on SPDT switch")
-        GPIO.output(self.pins_to_enable, GPIO.HIGH)
         return True
 
 class SP3TSwitchStrategy(SwitchStrategy):
@@ -28,9 +21,28 @@ class SP3TSwitchStrategy(SwitchStrategy):
         return True
 
 class SP4TSwitchStrategy(SwitchStrategy):
+    def __init__(self):
+        GPIO.setmode(GPIO.BCM)
+        self.operating_pins = [17, 22, 27]
+        
+        for pin in self.operating_pins:
+            GPIO.setup(pin, GPIO.OUT)
+        # All pins in HIGH state, switch in shutdown state
+        GPIO.output(self.operating_pins, GPIO.HIGH)
+
     def enableFilter(self, filter_index):
-        # TODO
         print(f"Enabling filter {filter_index} on SP4T switch")
+        if (filter_index == 1):
+            GPIO.output([17, 22, 27], GPIO.LOW)
+        if (filter_index == 2):
+            GPIO.output([17, 22], GPIO.LOW)
+            GPIO.output([27], GPIO.HIGH)
+        if (filter_index == 3):
+            GPIO.output([17], GPIO.LOW)
+            GPIO.output([22, 27], GPIO.HIGH)
+        if (filter_index == 4):
+            GPIO.output([22], GPIO.LOW)
+            GPIO.output([17, 27], GPIO.HIGH)
         return True
 
 class SP6TSwitchStrategy(SwitchStrategy):
