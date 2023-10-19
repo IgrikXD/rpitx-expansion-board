@@ -15,10 +15,10 @@ class RFSwitch(ABC):
 
     def __init__(self, switch_pinout, switch_truth_table):
         # Used BCM port numbering by default
-        used_pin_factory = MockFactory()
+        # used_pin_factory = MockFactory()
         self.switch_pinout = switch_pinout
         self.switch_truth_table = switch_truth_table
-        # used_pin_factory = None
+        used_pin_factory = None
         self.switch_control = [
             OutputDevice(pin=gpio_number, initial_value=HIGH, pin_factory=used_pin_factory)
             for gpio_number in self.switch_pinout
