@@ -36,7 +36,7 @@ class SP4TSwitchStrategy(SwitchStrategy):
         # used_pin_factory = MockFactory()
         used_pin_factory = None
         self.input_switch = [
-            OutputDevice(pin=pin_number, active_high=False, pin_factory=used_pin_factory)
+            OutputDevice(pin=pin_number, initial_value=True, pin_factory=used_pin_factory)
             for pin_number in self.RF_INPUT_SWITCH_PINOUT
         ]
         for i, switch in enumerate(self.input_switch):
