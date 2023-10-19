@@ -11,8 +11,14 @@ APPLICATION_TITLE = "rpitx-expansion-board control application"
 FAREWELL_MESSAGE = "Thanks for using rpitx-expansion-board project!"
 CONFIGURATION_CREATED_ABORTED = "Configuration creation aborted!"
 
-
 class UserInterface:
+
+    # List of actions available to perform for a specific device
+    CONFIGURATION_ACTIONS = [
+        "Create a new device configuration",
+        "Load device configuration"
+    ]
+
     def __init__(self, devices_list, configuration_actions):
         self.whiptail_interface = Whiptail(title=APPLICATION_TITLE)
         self.devices_list = devices_list
@@ -76,16 +82,18 @@ class UserInterface:
                 exit(0)
             else:
                 active_filter = current_filter
-                device.enableFilter(filter_names.index(current_filter) + 1)
+                if (device.enableFilter(filter_names.index(current_filter) + 1)):
+                    self.whiptail_interface.msgbox(f"{current_filter} enabled!")
+                else:
+                    self.whiptail_interface.msgbox("Error in device configuration!")
 
-    def createConfiguration(self, selected_board, device_type_mapping, filter_objects):
-        switch_type, num_filters = device_type_mapping[selected_board]
-        device = Device(switch_type, selected_board)
+    def createConfiguration(self, selected_board, filter_objects):
+        device = Device(selected_board)
 
-        for i in range(num_filters):
+        for i in range(device.filters_amount):
             
             unique_case_styles = sorted(set(filter.case_style for filter in filter_objects))
-            filter_case = self.whiptail_interface.menu(f"Choose case for filter {i + 1} from {num_filters}:", unique_case_styles)
+            filter_case = self.whiptail_interface.menu(f"Choose case for filter {i + 1} from {device.filters_amount}:", unique_case_styles)
 
             # <Cancel> button has been pressed
             if(filter_case[1] == CANCEL_BUTTON):

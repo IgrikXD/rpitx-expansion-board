@@ -14,7 +14,7 @@ class Filter:
 
 class FiltersList:
     def __init__(self, filter_models_dir):
-        self.filters = self.getFiltersList(filter_models_dir)
+        self.data = self.getFiltersList(filter_models_dir)
 
     def getFiltersList(self, filter_models_dir):
         filters = []
