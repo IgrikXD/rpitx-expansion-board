@@ -2,44 +2,21 @@ from abc import ABC, abstractmethod
 import os
 import pickle
 from gpiozero.pins.mock import MockFactory
-from gpiozero import DigitalOutputDevice, OutputDevice
+from gpiozero import OutputDevice
 
 # Aliases for high and low logic levels
 HIGH = True
 LOW = False
 
-class SwitchStrategy(ABC):
-    @abstractmethod
-    def enableFilter(self, filter_index):
-        pass
-
-class SPDTSwitchStrategy(SwitchStrategy):
-    def enableFilter(self, filter_index):
-        # TODO
-        print(f"Enabling filter {filter_index} on SPDT switch")
-        return True
-
-class SP3TSwitchStrategy(SwitchStrategy):
-    def enableFilter(self, filter_index):
-        # TODO
-        print(f"Enabling filter {filter_index} on SP3T switch")
-        return True
-
-class SP4TSwitchStrategy(SwitchStrategy):
+class RFSwitch(ABC):
 
     RF_INPUT_SWITCH_PINOUT = [17, 27, 22]
     RF_OUTPUT_SWITCH_PINOUT = [0, 5, 6]
-    RF_SWITCH_OUTPUTS_TO_GPIO = {
-            1: (LOW, LOW, LOW),     #RF common to RF1
-            2: (LOW, LOW, HIGH),    #RF common to RF2
-            3: (HIGH, LOW, LOW),    #RF common to RF3
-            4: (HIGH, LOW, HIGH)    #RF common to RF4
-    }
 
     def __init__(self):
         # Used BCM port numbering by default
-        # used_pin_factory = MockFactory()
-        used_pin_factory = None
+        used_pin_factory = MockFactory()
+        # used_pin_factory = None
         self.input_switch = [
             OutputDevice(pin=gpio_number, initial_value=HIGH, pin_factory=used_pin_factory)
             for gpio_number in self.RF_INPUT_SWITCH_PINOUT
@@ -49,27 +26,87 @@ class SP4TSwitchStrategy(SwitchStrategy):
             for gpio_number in self.RF_OUTPUT_SWITCH_PINOUT
         ]
 
+    @abstractmethod
+    def enableFilter(self, filter_index):
+        pass
+
+    def changeControlSignals(self, gpio_values):
+        for gpio_number, gpio_state in zip(self.input_switch, gpio_values):
+            gpio_number.value = gpio_state
+            print(gpio_state)
+
+        for gpio_number, gpio_state in zip(self.output_switch, gpio_values):
+            gpio_number.value = gpio_state
+
+class SPDTSwitch(RFSwitch):
+
+    RF_SWITCH_OUTPUTS_TO_GPIO = {
+            1: (LOW, LOW, LOW),     #RF common to RF1
+            2: (LOW, LOW, HIGH)     #RF common to RF2
+    }
+
+    def enableFilter(self, filter_index):
+        print(f"Enabling filter {filter_index} on SPDT switch")
+
+        try:
+            self.changeControlSignals(self.RF_SWITCH_OUTPUTS_TO_GPIO[filter_index])
+        except Exception:
+            return False
+        return True
+
+class SP3TSwitch(RFSwitch):
+
+    RF_SWITCH_OUTPUTS_TO_GPIO = {
+            1: (LOW, LOW, LOW),     #RF common to RF1
+            2: (LOW, LOW, HIGH),    #RF common to RF2
+            3: (HIGH, LOW, LOW)     #RF common to RF3
+    }
+
+    def enableFilter(self, filter_index):
+        print(f"Enabling filter {filter_index} on SP3T switch")
+
+        try:
+            self.changeControlSignals(self.RF_SWITCH_OUTPUTS_TO_GPIO[filter_index])
+        except Exception:
+            return False
+        return True
+
+class SP4TSwitch(RFSwitch):
+
+    RF_SWITCH_OUTPUTS_TO_GPIO = {
+            1: (LOW, LOW, LOW),     #RF common to RF1
+            2: (LOW, LOW, HIGH),    #RF common to RF2
+            3: (HIGH, LOW, LOW),    #RF common to RF3
+            4: (HIGH, LOW, HIGH)    #RF common to RF4
+    }
+
     def enableFilter(self, filter_index):
         print(f"Enabling filter {filter_index} on SP4T switch")
         
         try:
-            gpio_values = SP4TSwitchStrategy.RF_SWITCH_OUTPUTS_TO_GPIO[filter_index]
-
-            for gpio_number, gpio_state in zip(self.input_switch, gpio_values):
-                gpio_number.value = gpio_state
-
-            for gpio_number, gpio_state in zip(self.output_switch, gpio_values):
-                gpio_number.value = gpio_state
-                
+            self.changeControlSignals(self.RF_SWITCH_OUTPUTS_TO_GPIO[filter_index])
         except Exception:
             return False
-
         return True
 
-class SP6TSwitchStrategy(SwitchStrategy):
+class SP6TSwitch(RFSwitch):
+
+    RF_SWITCH_OUTPUTS_TO_GPIO = {
+            1: (LOW, LOW, LOW),     #RF common to RF1
+            2: (LOW, LOW, HIGH),    #RF common to RF2
+            3: (LOW, HIGH, LOW),    #RF common to RF3
+            4: (LOW, HIGH, HIGH),   #RF common to RF4
+            5: (HIGH, LOW, LOW),    #RF common to RF5
+            6: (HIGH, LOW, HIGH),   #RF common to RF6
+    }
+
     def enableFilter(self, filter_index):
-        # TODO
         print(f"Enabling filter {filter_index} on SP6T switch")
+
+        try:
+            self.changeControlSignals(self.RF_SWITCH_OUTPUTS_TO_GPIO[filter_index])
+        except Exception:
+            return False
         return True
 
 class Device:
@@ -103,13 +140,13 @@ class Device:
         # is launched for the first time.
         if (self.switch_strategy == None):
             if (self.model_name == self.DEVICES_LIST[0]):
-                self.switch_strategy = SPDTSwitchStrategy()
+                self.switch_strategy = SPDTSwitch()
             elif (self.model_name == self.DEVICES_LIST[1]):
-                self.switch_strategy = SP3TSwitchStrategy()
+                self.switch_strategy = SP3TSwitch()
             elif (self.model_name == self.DEVICES_LIST[2]):
-                self.switch_strategy = SP4TSwitchStrategy()
+                self.switch_strategy = SP4TSwitch()
             elif (self.model_name == self.DEVICES_LIST[3]):
-                self.switch_strategy = SP6TSwitchStrategy()
+                self.switch_strategy = SP6TSwitch()
         
         return self.switch_strategy.enableFilter(filter_index)
     
