@@ -38,8 +38,8 @@ class SP4TSwitchStrategy(SwitchStrategy):
 
     def __init__(self):
         # Used BCM port numbering by default
-        used_pin_factory = MockFactory()
-        # used_pin_factory = None
+        # used_pin_factory = MockFactory()
+        used_pin_factory = None
         self.input_switch = [
             OutputDevice(pin=gpio_number, initial_value=HIGH, pin_factory=used_pin_factory)
             for gpio_number in self.RF_INPUT_SWITCH_PINOUT
@@ -52,11 +52,13 @@ class SP4TSwitchStrategy(SwitchStrategy):
     def enableFilter(self, filter_index):
         print(f"Enabling filter {filter_index} on SP4T switch")
         
-        for gpio_number in self.input_switch:
-            gpio_number.value = SP4TSwitchStrategy.RF_SWITCH_OUTPUTS_TO_GPIO[filter_index][self.input_switch.index(gpio_number)]
+        gpio_values = SP4TSwitchStrategy.RF_SWITCH_OUTPUTS_TO_GPIO[filter_index]
 
-        for gpio_number in self.output_switch:
-            gpio_number.value = SP4TSwitchStrategy.RF_SWITCH_OUTPUTS_TO_GPIO[filter_index][self.output_switch.index(gpio_number)]
+        for gpio_number, gpio_state in zip(self.input_switch, gpio_values):
+            gpio_number.value = gpio_state
+
+        for gpio_number, gpio_state in zip(self.output_switch, gpio_values):
+            gpio_number.value = gpio_state
 
         return True
 
@@ -90,28 +92,28 @@ class Device:
         self.model_name = model_name
         self.filters = []
         self.switch_strategy = None
-        self.filters_amount = Device.DEVICE_TYPE_MAPPING[model_name]
+        self.filters_amount = self.DEVICE_TYPE_MAPPING[model_name]
 
     def enableFilter(self, filter_index):
         # The operating strategy is selected when the enableFilter function 
         # is launched for the first time.
         if (self.switch_strategy == None):
-            if (self.model_name == Device.DEVICES_LIST[0]):
+            if (self.model_name == self.DEVICES_LIST[0]):
                 self.switch_strategy = SPDTSwitchStrategy()
-            elif (self.model_name == Device.DEVICES_LIST[1]):
+            elif (self.model_name == self.DEVICES_LIST[1]):
                 self.switch_strategy = SP3TSwitchStrategy()
-            elif (self.model_name == Device.DEVICES_LIST[2]):
+            elif (self.model_name == self.DEVICES_LIST[2]):
                 self.switch_strategy = SP4TSwitchStrategy()
-            elif (self.model_name == Device.DEVICES_LIST[3]):
+            elif (self.model_name == self.DEVICES_LIST[3]):
                 self.switch_strategy = SP6TSwitchStrategy()
         
         return self.switch_strategy.enableFilter(filter_index)
     
     def getConfigurationInfo(self):
-        configuration_info = f"{Device.CONFIGURATION_INFO_DELIMITER}\nActive board configuration:\n"
-        configuration_info += f"{Device.CONFIGURATION_INFO_DELIMITER}\nChoosed board: {self.model_name}\n"
-        configuration_info += f"{Device.CONFIGURATION_INFO_DELIMITER}\nChoosed filters:\n"
-        configuration_info += Device.CONFIGURATION_INFO_DELIMITER
+        configuration_info = f"{self.CONFIGURATION_INFO_DELIMITER}\nActive board configuration:\n"
+        configuration_info += f"{self.CONFIGURATION_INFO_DELIMITER}\nChoosed board: {self.model_name}\n"
+        configuration_info += f"{self.CONFIGURATION_INFO_DELIMITER}\nChoosed filters:\n"
+        configuration_info += self.CONFIGURATION_INFO_DELIMITER
         for i, filter_obj in enumerate(self.filters, start=1):
             configuration_info += f"\nFilter {i}:\n"
             configuration_info += f"Model Number: {filter_obj.model_number}\n"
@@ -122,6 +124,6 @@ class Device:
             configuration_info += f"Passband F2: {filter_obj.passband_f2} MHz\n"
             configuration_info += f"Stopband F3: {filter_obj.stopband_f3} MHz\n"
             configuration_info += f"Stopband F4: {filter_obj.stopband_f4} MHz\n"
-            configuration_info += Device.CONFIGURATION_INFO_DELIMITER
+            configuration_info += self.CONFIGURATION_INFO_DELIMITER
 
         return configuration_info
