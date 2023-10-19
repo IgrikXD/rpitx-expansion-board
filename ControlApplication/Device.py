@@ -36,8 +36,6 @@ class SP4TSwitchStrategy(SwitchStrategy):
             4: (HIGH, LOW, HIGH)    #RF common to RF4
     }
 
-    
-
     def __init__(self):
         # Used BCM port numbering by default
         used_pin_factory = MockFactory()
@@ -84,10 +82,10 @@ class Device:
     # Matching a specific device with its configuration
     # <DEVICE> : (<SWITCH TYPE>, <NUMBER OF AVAILABLE FILTERS>)
     DEVICE_TYPE_MAPPING = {
-        DEVICES_LIST[0]: (SPDTSwitchStrategy(), 2),
-        DEVICES_LIST[1]: (SP3TSwitchStrategy(), 3),
-        DEVICES_LIST[2]: (SP4TSwitchStrategy(), 4),
-        DEVICES_LIST[3]: (SP6TSwitchStrategy(), 6)
+        DEVICES_LIST[0]: (2),
+        DEVICES_LIST[1]: (3),
+        DEVICES_LIST[2]: (4),
+        DEVICES_LIST[3]: (6)
     }
 
     CONFIGURATION_INFO_DELIMITER = "=" * 60
@@ -95,12 +93,24 @@ class Device:
     def __init__(self, model_name):
         self.model_name = model_name
         self.filters = []
+        self.switch_strategy = None
         if model_name in Device.DEVICE_TYPE_MAPPING:
-            self.switch_strategy, self.filters_amount = Device.DEVICE_TYPE_MAPPING[model_name]
+            self.filters_amount = Device.DEVICE_TYPE_MAPPING[model_name]
 
     def enableFilter(self, filter_index):
-        if self.switch_strategy:
-            return self.switch_strategy.enableFilter(filter_index)
+        # The operating strategy is selected when the enableFilter function 
+        # is launched for the first time.
+        if (self.switch_strategy == None):
+            if (self.filters_amount == 2):
+                self.switch_strategy = SPDTSwitchStrategy()
+            elif (self.filters_amount == 3):
+                self.switch_strategy = SP3TSwitchStrategy()
+            elif (self.filters_amount == 4):
+                self.switch_strategy = SP4TSwitchStrategy()
+            elif (self.filters_amount == 6):
+                self.switch_strategy = SP6TSwitchStrategy()
+        
+        return self.switch_strategy.enableFilter(filter_index)
     
     def getConfigurationInfo(self):
         configuration_info = f"{Device.CONFIGURATION_INFO_DELIMITER}\nActive board configuration:\n"
