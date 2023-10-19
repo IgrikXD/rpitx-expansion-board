@@ -13,66 +13,42 @@ class RFSwitch(ABC):
     RF_INPUT_SWITCH_PINOUT = [17, 27, 22]
     RF_OUTPUT_SWITCH_PINOUT = [0, 5, 6]
 
-    def __init__(self):
+    def __init__(self, switch_pinout, switch_truth_table):
         # Used BCM port numbering by default
         used_pin_factory = MockFactory()
+        self.switch_pinout = switch_pinout
+        self.switch_truth_table = switch_truth_table
         # used_pin_factory = None
-        self.input_switch = [
+        self.switch_control = [
             OutputDevice(pin=gpio_number, initial_value=HIGH, pin_factory=used_pin_factory)
-            for gpio_number in self.RF_INPUT_SWITCH_PINOUT
-        ]
-        self.output_switch = [
-            OutputDevice(pin=gpio_number, initial_value=HIGH, pin_factory=used_pin_factory)
-            for gpio_number in self.RF_OUTPUT_SWITCH_PINOUT
+            for gpio_number in self.switch_pinout
         ]
 
-    @abstractmethod
-    def activateRFOutput(self, filter_index):
-        pass
-
-    def changeControlSignals(self, gpio_values):
-        for gpio_number, gpio_state in zip(self.input_switch, gpio_values):
-            gpio_number.value = gpio_state
-            print(gpio_state)
-
-        for gpio_number, gpio_state in zip(self.output_switch, gpio_values):
-            gpio_number.value = gpio_state
+    def activateRFOutput(self, rf_output):
+        try:
+            #if not initilized - initialize
+            for output_gpio_obj, gpio_state in zip(self.switch_control, self.switch_truth_table[rf_output]):
+                output_gpio_obj.value = gpio_state
+                print(f"{output_gpio_obj}: {gpio_state}")
+            print("==================================")
+        except Exception:
+            return False
+        return True
 
 class SPDTSwitch(RFSwitch):
-
     RF_SWITCH_OUTPUTS_TO_GPIO = {
             1: (LOW, LOW, LOW),     #RF common to RF1
             2: (LOW, LOW, HIGH)     #RF common to RF2
     }
 
-    def activateRFOutput(self, filter_index):
-        print(f"Enabling filter {filter_index} on SPDT switch")
-
-        try:
-            self.changeControlSignals(self.RF_SWITCH_OUTPUTS_TO_GPIO[filter_index])
-        except Exception:
-            return False
-        return True
-
 class SP3TSwitch(RFSwitch):
-
     RF_SWITCH_OUTPUTS_TO_GPIO = {
             1: (LOW, LOW, LOW),     #RF common to RF1
             2: (LOW, LOW, HIGH),    #RF common to RF2
             3: (HIGH, LOW, LOW)     #RF common to RF3
     }
 
-    def activateRFOutput(self, filter_index):
-        print(f"Enabling filter {filter_index} on SP3T switch")
-
-        try:
-            self.changeControlSignals(self.RF_SWITCH_OUTPUTS_TO_GPIO[filter_index])
-        except Exception:
-            return False
-        return True
-
 class SP4TSwitch(RFSwitch):
-
     RF_SWITCH_OUTPUTS_TO_GPIO = {
             1: (LOW, LOW, LOW),     #RF common to RF1
             2: (LOW, LOW, HIGH),    #RF common to RF2
@@ -80,17 +56,7 @@ class SP4TSwitch(RFSwitch):
             4: (HIGH, LOW, HIGH)    #RF common to RF4
     }
 
-    def activateRFOutput(self, filter_index):
-        print(f"Enabling filter {filter_index} on SP4T switch")
-        
-        try:
-            self.changeControlSignals(self.RF_SWITCH_OUTPUTS_TO_GPIO[filter_index])
-        except Exception:
-            return False
-        return True
-
 class SP6TSwitch(RFSwitch):
-
     RF_SWITCH_OUTPUTS_TO_GPIO = {
             1: (LOW, LOW, LOW),     #RF common to RF1
             2: (LOW, LOW, HIGH),    #RF common to RF2
@@ -100,21 +66,12 @@ class SP6TSwitch(RFSwitch):
             6: (HIGH, LOW, HIGH),   #RF common to RF6
     }
 
-    def activateRFOutput(self, filter_index):
-        print(f"Enabling filter {filter_index} on SP6T switch")
-
-        try:
-            self.changeControlSignals(self.RF_SWITCH_OUTPUTS_TO_GPIO[filter_index])
-        except Exception:
-            return False
-        return True
-
 class Device:
     # List of available device for operation
     DEVICES_LIST = [
-        "rpitx-expansion-board-SPDT", 
-        "rpitx-expansion-board-SP3T", 
-        "rpitx-expansion-board-SP4T", 
+        "rpitx-expansion-board-SPDT",
+        "rpitx-expansion-board-SP3T",
+        "rpitx-expansion-board-SP4T",
         "rpitx-expansion-board-SP6T"
     ]
     
@@ -132,23 +89,28 @@ class Device:
     def __init__(self, model_name):
         self.model_name = model_name
         self.filters = []
-        self.switch_type = None
+        self.filers_input_switch = None
+        self.filers_output_switch = None
         self.filters_amount = self.DEVICE_TYPE_MAPPING[model_name]
 
     def enableFilter(self, filter_index):
         # The operating strategy is selected when the enableFilter function 
         # is launched for the first time.
-        if (self.switch_type == None):
+        if (self.filers_input_switch == None):
             if (self.model_name == self.DEVICES_LIST[0]):
-                self.switch_type = SPDTSwitch()
+                self.filers_input_switch = SPDTSwitch([17, 27, 22], SPDTSwitch.RF_SWITCH_OUTPUTS_TO_GPIO)
+                self.filers_output_switch = SPDTSwitch([17, 27, 22], SPDTSwitch.RF_SWITCH_OUTPUTS_TO_GPIO)
             elif (self.model_name == self.DEVICES_LIST[1]):
-                self.switch_type = SP3TSwitch()
+                self.filers_input_switch = SP3TSwitch([17, 27, 22], SP3TSwitch.RF_SWITCH_OUTPUTS_TO_GPIO)
+                self.filers_output_switch = SP3TSwitch([0, 5, 6], SP3TSwitch.RF_SWITCH_OUTPUTS_TO_GPIO)
             elif (self.model_name == self.DEVICES_LIST[2]):
-                self.switch_type = SP4TSwitch()
+                self.filers_input_switch = SP4TSwitch([17, 27, 22], SP4TSwitch.RF_SWITCH_OUTPUTS_TO_GPIO)
+                self.filers_output_switch = SP4TSwitch([0, 5, 6], SP4TSwitch.RF_SWITCH_OUTPUTS_TO_GPIO)
             elif (self.model_name == self.DEVICES_LIST[3]):
-                self.switch_type = SP6TSwitch()
+                self.filers_input_switch = SP6TSwitch([17, 27, 22], SP6TSwitch.RF_SWITCH_OUTPUTS_TO_GPIO)
+                self.filers_output_switch = SP6TSwitch([0, 5, 6], SP6TSwitch.RF_SWITCH_OUTPUTS_TO_GPIO)
         
-        return self.switch_type.activateRFOutput(filter_index)
+        return self.filers_input_switch.activateRFOutput(filter_index)
     
     def getConfigurationInfo(self):
         configuration_info = f"{self.CONFIGURATION_INFO_DELIMITER}\nActive board configuration:\n"
