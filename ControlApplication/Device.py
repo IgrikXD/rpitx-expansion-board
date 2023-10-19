@@ -33,8 +33,10 @@ class SP4TSwitchStrategy(SwitchStrategy):
     
     def __init__(self):
         # Used BCM port numbering by default
+        # used_pin_factory = MockFactory()
+        used_pin_factory = None
         self.input_switch = [
-            OutputDevice(pin=pin_number, active_high=False, pin_factory=MockFactory())
+            OutputDevice(pin=pin_number, active_high=False, pin_factory=used_pin_factory)
             for pin_number in self.RF_INPUT_SWITCH_PINOUT
         ]
         for i, switch in enumerate(self.input_switch):
