@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 import os
 import pickle
+import RPi.GPIO as GPIO
 
 class SwitchStrategy(ABC):
     @abstractmethod
@@ -8,9 +9,16 @@ class SwitchStrategy(ABC):
         pass
 
 class SPDTSwitchStrategy(SwitchStrategy):
+    def __init__(self):
+        GPIO.setmode(GPIO.BCM)
+        self.pins_to_enable = [17, 18, 19]
+        for pin in self.pins_to_enable:
+            GPIO.setup(pin, GPIO.OUT)
+
     def enableFilter(self, filter_index):
         # TODO
         print(f"Enabling filter {filter_index} on SPDT switch")
+        GPIO.output(self.pins_to_enable, GPIO.HIGH)
         return True
 
 class SP3TSwitchStrategy(SwitchStrategy):
