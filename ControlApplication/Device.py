@@ -23,12 +23,14 @@ class SP3TSwitchStrategy(SwitchStrategy):
 
 class SP4TSwitchStrategy(SwitchStrategy):
 
+    HIGH = True
+    LOW = False
     RF_INPUT_SWITCH_PINOUT = [17, 22, 27]
     RF_INPUT_SWITCH_OUTPUTS_GPIO_STATE_MAPPING = {
-            1: (False, False, False), #RF common to RF1
-            2: (False, False, True),  #RF common to RF2
-            3: (True, False, False),  #RF common to RF3
-            4: (True, False, True)    #RF common to RF4
+            1: (LOW, LOW, LOW),     #RF common to RF1
+            2: (LOW, LOW, HIGH),    #RF common to RF2
+            3: (HIGH, LOW, LOW),    #RF common to RF3
+            4: (HIGH, LOW, HIGH)    #RF common to RF4
     }
     
     def __init__(self):
@@ -36,7 +38,7 @@ class SP4TSwitchStrategy(SwitchStrategy):
         # used_pin_factory = MockFactory()
         used_pin_factory = None
         self.input_switch = [
-            OutputDevice(pin=pin_number, initial_value=True, pin_factory=used_pin_factory)
+            OutputDevice(pin=pin_number, initial_value=SP4TSwitchStrategy.HIGH, pin_factory=used_pin_factory)
             for pin_number in self.RF_INPUT_SWITCH_PINOUT
         ]
         for i, switch in enumerate(self.input_switch):
