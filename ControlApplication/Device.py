@@ -80,7 +80,7 @@ class Device:
     ]
     
     # Matching a specific device with its configuration
-    # <DEVICE> : (<SWITCH TYPE>, <NUMBER OF AVAILABLE FILTERS>)
+    # <DEVICE> : (<NUMBER OF AVAILABLE FILTERS>)
     DEVICE_TYPE_MAPPING = {
         DEVICES_LIST[0]: (2),
         DEVICES_LIST[1]: (3),
@@ -94,20 +94,19 @@ class Device:
         self.model_name = model_name
         self.filters = []
         self.switch_strategy = None
-        if model_name in Device.DEVICE_TYPE_MAPPING:
-            self.filters_amount = Device.DEVICE_TYPE_MAPPING[model_name]
+        self.filters_amount = Device.DEVICE_TYPE_MAPPING[model_name]
 
     def enableFilter(self, filter_index):
         # The operating strategy is selected when the enableFilter function 
         # is launched for the first time.
         if (self.switch_strategy == None):
-            if (self.filters_amount == 2):
+            if (self.model_name == Device.DEVICES_LIST[0]):
                 self.switch_strategy = SPDTSwitchStrategy()
-            elif (self.filters_amount == 3):
+            elif (self.model_name == Device.DEVICES_LIST[1]):
                 self.switch_strategy = SP3TSwitchStrategy()
-            elif (self.filters_amount == 4):
+            elif (self.model_name == Device.DEVICES_LIST[2]):
                 self.switch_strategy = SP4TSwitchStrategy()
-            elif (self.filters_amount == 6):
+            elif (self.model_name == Device.DEVICES_LIST[3]):
                 self.switch_strategy = SP6TSwitchStrategy()
         
         return self.switch_strategy.enableFilter(filter_index)
