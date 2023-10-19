@@ -110,7 +110,7 @@ class Device:
                 self.filers_input_switch = SP6TSwitch([17, 27, 22], SP6TSwitch.RF_SWITCH_OUTPUTS_TO_GPIO)
                 self.filers_output_switch = SP6TSwitch([0, 5, 6], SP6TSwitch.RF_SWITCH_OUTPUTS_TO_GPIO)
         
-        return self.filers_input_switch.activateRFOutput(filter_index)
+        return (self.filers_input_switch.activateRFOutput(filter_index) and self.filers_output_switch.activateRFOutput(filter_index))
     
     def getConfigurationInfo(self):
         configuration_info = f"{self.CONFIGURATION_INFO_DELIMITER}\nActive board configuration:\n"
