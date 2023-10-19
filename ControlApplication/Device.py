@@ -11,7 +11,7 @@ class SwitchStrategy(ABC):
 class SPDTSwitchStrategy(SwitchStrategy):
     def __init__(self):
         GPIO.setmode(GPIO.BCM)
-        self.pins_to_enable = [17, 18, 19]
+        self.pins_to_enable = [17, 27, 22]
         for pin in self.pins_to_enable:
             GPIO.setup(pin, GPIO.OUT)
 
