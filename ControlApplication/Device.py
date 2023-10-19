@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 import os
 import pickle
-import RPi.GPIO as GPIO
+from gpiozero.pins.mock import MockFactory
+from gpiozero import DigitalOutputDevice, OutputDevice
 
 class SwitchStrategy(ABC):
     @abstractmethod
@@ -21,28 +22,33 @@ class SP3TSwitchStrategy(SwitchStrategy):
         return True
 
 class SP4TSwitchStrategy(SwitchStrategy):
+
+    RF_INPUT_SWITCH_PINOUT = [17, 22, 27]
+    RF_INPUT_SWITCH_OUTPUTS_GPIO_STATE_MAPPING = {
+            1: (False, False, False), #RF common to RF1
+            2: (False, False, True),  #RF common to RF2
+            3: (True, False, False),  #RF common to RF3
+            4: (True, False, True)    #RF common to RF4
+    }
+    
     def __init__(self):
-        GPIO.setmode(GPIO.BCM)
-        self.operating_pins = [17, 22, 27]
-        
-        for pin in self.operating_pins:
-            GPIO.setup(pin, GPIO.OUT)
-        # All pins in HIGH state, switch in shutdown state
-        GPIO.output(self.operating_pins, GPIO.HIGH)
+        # Used BCM port numbering by default
+        self.input_switch = [
+            OutputDevice(pin=pin_number, active_high=False, pin_factory=MockFactory())
+            for pin_number in self.RF_INPUT_SWITCH_PINOUT
+        ]
+        for i, switch in enumerate(self.input_switch):
+            print(f"Initial value PIN{self.RF_INPUT_SWITCH_PINOUT[i]}: {switch.value}")
 
     def enableFilter(self, filter_index):
         print(f"Enabling filter {filter_index} on SP4T switch")
-        if (filter_index == 1):
-            GPIO.output([17, 22, 27], GPIO.LOW)
-        if (filter_index == 2):
-            GPIO.output([17, 22], GPIO.LOW)
-            GPIO.output([27], GPIO.HIGH)
-        if (filter_index == 3):
-            GPIO.output([17], GPIO.LOW)
-            GPIO.output([22, 27], GPIO.HIGH)
-        if (filter_index == 4):
-            GPIO.output([22], GPIO.LOW)
-            GPIO.output([17, 27], GPIO.HIGH)
+        
+        for switch in self.input_switch:
+            switch.value = SP4TSwitchStrategy.RF_INPUT_SWITCH_OUTPUTS_GPIO_STATE_MAPPING[filter_index][self.input_switch.index(switch)]
+
+        for i, switch in enumerate(self.input_switch):
+            print(f"Actual value PIN{self.RF_INPUT_SWITCH_PINOUT[i]}: {switch.value}")
+
         return True
 
 class SP6TSwitchStrategy(SwitchStrategy):

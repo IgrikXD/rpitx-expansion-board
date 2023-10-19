@@ -24,7 +24,7 @@ def main():
             device = user_interface.createConfiguration(board, filters_list.data)
             if device == None:
                 continue
-            user_interface.saveConfiguration(device)
+            # user_interface.saveConfiguration(device)
 
         # "Load device configuration" has been choosen
         if (action[0] == UserInterface.CONFIGURATION_ACTIONS[1]):
