@@ -52,13 +52,17 @@ class SP4TSwitchStrategy(SwitchStrategy):
     def enableFilter(self, filter_index):
         print(f"Enabling filter {filter_index} on SP4T switch")
         
-        gpio_values = SP4TSwitchStrategy.RF_SWITCH_OUTPUTS_TO_GPIO[filter_index]
+        try:
+            gpio_values = SP4TSwitchStrategy.RF_SWITCH_OUTPUTS_TO_GPIO[filter_index]
 
-        for gpio_number, gpio_state in zip(self.input_switch, gpio_values):
-            gpio_number.value = gpio_state
+            for gpio_number, gpio_state in zip(self.input_switch, gpio_values):
+                gpio_number.value = gpio_state
 
-        for gpio_number, gpio_state in zip(self.output_switch, gpio_values):
-            gpio_number.value = gpio_state
+            for gpio_number, gpio_state in zip(self.output_switch, gpio_values):
+                gpio_number.value = gpio_state
+                
+        except Exception:
+            return False
 
         return True
 
