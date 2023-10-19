@@ -41,26 +41,22 @@ class SP4TSwitchStrategy(SwitchStrategy):
         used_pin_factory = MockFactory()
         # used_pin_factory = None
         self.input_switch = [
-            OutputDevice(pin=pin_number, initial_value=HIGH, pin_factory=used_pin_factory)
-            for pin_number in self.RF_INPUT_SWITCH_PINOUT
+            OutputDevice(pin=gpio_number, initial_value=HIGH, pin_factory=used_pin_factory)
+            for gpio_number in self.RF_INPUT_SWITCH_PINOUT
         ]
         self.output_switch = [
-            OutputDevice(pin=pin_number, initial_value=HIGH, pin_factory=used_pin_factory)
-            for pin_number in self.RF_OUTPUT_SWITCH_PINOUT
+            OutputDevice(pin=gpio_number, initial_value=HIGH, pin_factory=used_pin_factory)
+            for gpio_number in self.RF_OUTPUT_SWITCH_PINOUT
         ]
-        for i, switch in enumerate(self.input_switch):
-            print(f"Input switch initial value GPIO-{self.RF_INPUT_SWITCH_PINOUT[i]}: {switch.value}")
-        for i, switch in enumerate(self.output_switch):
-            print(f"Output switch initial value GPIO-{self.RF_OUTPUT_SWITCH_PINOUT[i]}: {switch.value}")
 
     def enableFilter(self, filter_index):
         print(f"Enabling filter {filter_index} on SP4T switch")
         
-        for switch in self.input_switch:
-            switch.value = SP4TSwitchStrategy.RF_SWITCH_OUTPUTS_TO_GPIO[filter_index][self.input_switch.index(switch)]
+        for gpio_number in self.input_switch:
+            gpio_number.value = SP4TSwitchStrategy.RF_SWITCH_OUTPUTS_TO_GPIO[filter_index][self.input_switch.index(gpio_number)]
 
-        for i, switch in enumerate(self.input_switch):
-            print(f"Input switch actual value GPIO{self.RF_INPUT_SWITCH_PINOUT[i]}: {switch.value}")
+        for gpio_number in self.output_switch:
+            gpio_number.value = SP4TSwitchStrategy.RF_SWITCH_OUTPUTS_TO_GPIO[filter_index][self.output_switch.index(gpio_number)]
 
         return True
 
