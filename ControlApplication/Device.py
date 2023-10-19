@@ -4,6 +4,10 @@ import pickle
 from gpiozero.pins.mock import MockFactory
 from gpiozero import DigitalOutputDevice, OutputDevice
 
+# Aliases for high and low logic levels
+HIGH = True
+LOW = False
+
 class SwitchStrategy(ABC):
     @abstractmethod
     def enableFilter(self, filter_index):
@@ -23,35 +27,42 @@ class SP3TSwitchStrategy(SwitchStrategy):
 
 class SP4TSwitchStrategy(SwitchStrategy):
 
-    HIGH = True
-    LOW = False
-    RF_INPUT_SWITCH_PINOUT = [17, 22, 27]
-    RF_INPUT_SWITCH_OUTPUTS_GPIO_STATE_MAPPING = {
+    RF_INPUT_SWITCH_PINOUT = [17, 27, 22]
+    RF_OUTPUT_SWITCH_PINOUT = [0, 5, 6]
+    RF_SWITCH_OUTPUTS_TO_GPIO = {
             1: (LOW, LOW, LOW),     #RF common to RF1
             2: (LOW, LOW, HIGH),    #RF common to RF2
             3: (HIGH, LOW, LOW),    #RF common to RF3
             4: (HIGH, LOW, HIGH)    #RF common to RF4
     }
+
     
+
     def __init__(self):
         # Used BCM port numbering by default
-        # used_pin_factory = MockFactory()
-        used_pin_factory = None
+        used_pin_factory = MockFactory()
+        # used_pin_factory = None
         self.input_switch = [
-            OutputDevice(pin=pin_number, initial_value=SP4TSwitchStrategy.HIGH, pin_factory=used_pin_factory)
+            OutputDevice(pin=pin_number, initial_value=HIGH, pin_factory=used_pin_factory)
             for pin_number in self.RF_INPUT_SWITCH_PINOUT
         ]
+        self.output_switch = [
+            OutputDevice(pin=pin_number, initial_value=HIGH, pin_factory=used_pin_factory)
+            for pin_number in self.RF_OUTPUT_SWITCH_PINOUT
+        ]
         for i, switch in enumerate(self.input_switch):
-            print(f"Initial value PIN{self.RF_INPUT_SWITCH_PINOUT[i]}: {switch.value}")
+            print(f"Input switch initial value GPIO-{self.RF_INPUT_SWITCH_PINOUT[i]}: {switch.value}")
+        for i, switch in enumerate(self.output_switch):
+            print(f"Output switch initial value GPIO-{self.RF_OUTPUT_SWITCH_PINOUT[i]}: {switch.value}")
 
     def enableFilter(self, filter_index):
         print(f"Enabling filter {filter_index} on SP4T switch")
         
         for switch in self.input_switch:
-            switch.value = SP4TSwitchStrategy.RF_INPUT_SWITCH_OUTPUTS_GPIO_STATE_MAPPING[filter_index][self.input_switch.index(switch)]
+            switch.value = SP4TSwitchStrategy.RF_SWITCH_OUTPUTS_TO_GPIO[filter_index][self.input_switch.index(switch)]
 
         for i, switch in enumerate(self.input_switch):
-            print(f"Actual value PIN{self.RF_INPUT_SWITCH_PINOUT[i]}: {switch.value}")
+            print(f"Input switch actual value GPIO{self.RF_INPUT_SWITCH_PINOUT[i]}: {switch.value}")
 
         return True
 
@@ -76,7 +87,7 @@ class Device:
         DEVICES_LIST[0]: (SPDTSwitchStrategy(), 2),
         DEVICES_LIST[1]: (SP3TSwitchStrategy(), 3),
         DEVICES_LIST[2]: (SP4TSwitchStrategy(), 4),
-        DEVICES_LIST[3]: (SP6TSwitchStrategy(), 6),
+        DEVICES_LIST[3]: (SP6TSwitchStrategy(), 6)
     }
 
     CONFIGURATION_INFO_DELIMITER = "=" * 60
