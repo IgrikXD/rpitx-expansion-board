@@ -7,8 +7,8 @@ LOW = False
 
 class RFSwitch():
 
-    RF_INPUT_SWITCH_PINOUT = [17, 27, 22]
-    RF_OUTPUT_SWITCH_PINOUT = [0, 5, 6]
+    RF_INPUT_SWITCH_GPIO_PINS = [17, 27, 22]
+    RF_OUTPUT_SWITCH_GPIO_PINS = [0, 5, 6]
 
     SP3T_SWITCH_TRUTH_TABLE = {
             1: (LOW, LOW, LOW),     #RF common to RF1
