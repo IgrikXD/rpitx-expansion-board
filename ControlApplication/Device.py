@@ -1,6 +1,3 @@
-import os
-import pickle
-
 from RFSwitch import *
 
 class Device:
