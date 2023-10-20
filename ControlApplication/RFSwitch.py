@@ -61,6 +61,10 @@ class RFSwitchContainer(RFSwitch):
         self.output_switch = RFSwitch(output_switch_pinout, switch_truth_table)
 
     def activateRFPath(self, rf_path_index):
+        # We activate two switches at the same time because we need to create a 
+        # path for the signal to pass through a particular filter. This is 
+        # achieved by sending the output signal to the input switch, passing 
+        # it through a filter and then exiting through the output switch
         return (self.input_switch.activateRFOutput(rf_path_index) and self.output_switch.activateRFOutput(rf_path_index))
 
 class FilterSwitch(RFSwitchContainer):
@@ -68,6 +72,8 @@ class FilterSwitch(RFSwitchContainer):
     FILTER_INPUT_SWITCH_GPIO_PINS = [17, 27, 22]
     FILTER_OUTPUT_SWITCH_GPIO_PINS = [0, 5, 6]
 
+    def enableFilter(self, filter_index):
+            return self.activateRFPath(filter_index) 
     
 class LNASwitch(RFSwitchContainer):
 

@@ -73,7 +73,7 @@ class UserInterface:
         for i, filter_obj in enumerate(device.filters):
             actions_list.append(f"Activate filter {i + 1}: {filter_obj.model_number}, {filter_obj.description}")
         if (device.lna_switch != None):
-                actions_list.append(f"Toogle LNA state: {device.lna[0].model_number}, {device.lna[0].description}")
+                actions_list.append(f"Toogle LNA state: {device.lna[0].model_number}, {device.lna[0].description}, {device.lna[0].f_low} - {device.lna[0].f_high} MHz")
         
         return actions_list
 
@@ -107,7 +107,7 @@ class UserInterface:
             else:
                 if (action_choice[USER_CHOICE][1] == "filter"):
                     active_filter = f"{action_choice[USER_CHOICE][2][0]} - {' '.join(action_choice[USER_CHOICE][3:])}"
-                    if (device.enableFilter(int(action_choice[0][2][0]))):
+                    if (device.filter_switch.enableFilter(int(action_choice[0][2][0]))):
                         self.whiptail_interface.msgbox(f"Filter {active_filter} enabled!")
                     else:
                         self.whiptail_interface.msgbox("Error in device configuration!")

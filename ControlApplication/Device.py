@@ -39,43 +39,41 @@ class Device:
         if (switch_truth_table != None):
             if (self.lna_switch == None):
                 self.lna_switch = LNASwitch(input_switch_pinout, output_switch_pinout, switch_truth_table)
-
-    def enableFilter(self, filter_index):
-        if (self.filter_switch != None):
-            # We activate two switches at the same time because we need to create a 
-            # path for the signal to pass through a particular filter. This is 
-            # achieved by sending the output signal to the input switch, passing 
-            # it through a filter and then exiting through the output switch
-            return self.filter_switch.activateRFPath(filter_index) 
-        return False
     
     def getConfigurationInfo(self):
         delimiter = "=" * 60
         configuration_info = f"{delimiter}\nActive board configuration:\n"
         configuration_info += f"{delimiter}\nChoosed board: {self.model_name}\n"
-        
+
         if self.lna:
-            configuration_info += delimiter
-            configuration_info += f"\nAmplifier:\n"
-            configuration_info += f"Model Number: {self.lna[0].model_number}\n"
-            configuration_info += f"Case Style: {self.lna[0].case_style}\n"
-            configuration_info += f"Description: {self.lna[0].description}\n"
-            configuration_info += f"F Low: {self.lna[0].f_low}\n"
-            configuration_info += f"F High: {self.lna[0].f_high} MHz\n"
-            configuration_info += f"Gain Typ: {self.lna[0].gain} dB\n"
+            lna_info = self.lna[0]
+            amplifier_info = (
+                f"{delimiter}\nAmplifier:\n"
+                f"Model Number: {lna_info.model_number}\n"
+                f"Case Style: {lna_info.case_style}\n"
+                f"Description: {lna_info.description}\n"
+                f"F Low: {lna_info.f_low}\n"
+                f"F High: {lna_info.f_high} MHz\n"
+                f"Gain Typ: {lna_info.gain} dB\n"
+            )
+            configuration_info += amplifier_info
 
         configuration_info += f"{delimiter}\nChoosed filters:\n"
         configuration_info += delimiter
+
         for i, filter_obj in enumerate(self.filters, start=1):
-            configuration_info += f"\nFilter {i}:\n"
-            configuration_info += f"Model Number: {filter_obj.model_number}\n"
-            configuration_info += f"Case Style: {filter_obj.case_style}\n"
-            configuration_info += f"Description: {filter_obj.description}\n"
-            configuration_info += f"Filter Type: {filter_obj.filter_type}\n"
-            configuration_info += f"Passband F1: {filter_obj.passband_f1} MHz\n"
-            configuration_info += f"Passband F2: {filter_obj.passband_f2} MHz\n"
-            configuration_info += f"Stopband F3: {filter_obj.stopband_f3} MHz\n"
-            configuration_info += f"Stopband F4: {filter_obj.stopband_f4} MHz\n"
-            configuration_info += delimiter
+            filter_info = (
+                f"\nFilter {i}:\n"
+                f"Model Number: {filter_obj.model_number}\n"
+                f"Case Style: {filter_obj.case_style}\n"
+                f"Description: {filter_obj.description}\n"
+                f"Filter Type: {filter_obj.filter_type}\n"
+                f"Passband F1: {filter_obj.passband_f1} MHz\n"
+                f"Passband F2: {filter_obj.passband_f2} MHz\n"
+                f"Stopband F3: {filter_obj.stopband_f3} MHz\n"
+                f"Stopband F4: {filter_obj.stopband_f4} MHz\n"
+                f"{delimiter}"
+            )
+            configuration_info += filter_info
 
         return configuration_info
