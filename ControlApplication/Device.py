@@ -2,21 +2,30 @@ import os
 import pickle
 
 from RFSwitch import *
+from LNA import *
 
 class Device:
     # List of available device for operation
     DEVICES_LIST = [
         "rpitx-expansion-board-SP3T",
         "rpitx-expansion-board-SP4T",
-        "rpitx-expansion-board-SP6T"
+        "rpitx-expansion-board-SP6T",
+        "rpitx-expansion-board-SP3T-LNA",
+        "rpitx-expansion-board-SP4T-LNA",
+        "rpitx-expansion-board-SP6T-LNA"
     ]
     
     # Matching a specific device with its configuration
     # <DEVICE> : (<NUMBER OF AVAILABLE FILTERS>, <RF SWITCH TRUTH TABLE>, <IS LNA SUPPORTED>)
     DEVICE_TYPE_MAPPING = {
+        # Boards without LNA
         DEVICES_LIST[0]: (3, RFSwitch.SP3T_SWITCH_TRUTH_TABLE, False),
         DEVICES_LIST[1]: (4, RFSwitch.SP4T_SWITCH_TRUTH_TABLE, False),
-        DEVICES_LIST[2]: (6, RFSwitch.SP6T_SWITCH_TRUTH_TABLE, False)
+        DEVICES_LIST[2]: (6, RFSwitch.SP6T_SWITCH_TRUTH_TABLE, False),
+        # Boards with LNA
+        DEVICES_LIST[3]: (3, RFSwitch.SP3T_SWITCH_TRUTH_TABLE, True),
+        DEVICES_LIST[4]: (4, RFSwitch.SP4T_SWITCH_TRUTH_TABLE, True),
+        DEVICES_LIST[5]: (6, RFSwitch.SP6T_SWITCH_TRUTH_TABLE, True)
     }
 
     def __init__(self, model_name):
@@ -25,11 +34,24 @@ class Device:
         self.filters_amount = self.DEVICE_TYPE_MAPPING[model_name][0]
         self.filers_input_switch = None
         self.filers_output_switch = None
+        self.lna = None
 
     def initFilterRFSwitches(self, input_switch_pinout, output_switch_pinout, switch_truth_table):
         if (self.filers_input_switch == None and self.filers_output_switch == None):
             self.filers_input_switch = RFSwitch(input_switch_pinout, switch_truth_table)
             self.filers_output_switch = RFSwitch(output_switch_pinout, switch_truth_table)
+
+    def initLNA(self, input_switch_pinout, output_switch_pinout, switch_truth_table):
+        if (self.lna == None):
+            
+            self.lna = LNA("PGA-103", "SOME DESCRIPTION")
+    
+    def toogleLNA(self):
+        if (self.lna.is_active == True):
+            self.lna.is_active = False
+        else:
+            self.lna.is_active = True
+        return self.lna.is_active
 
     def enableFilter(self, filter_index):
         if (self.filers_input_switch != None and self.filers_input_switch != None):

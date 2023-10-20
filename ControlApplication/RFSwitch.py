@@ -50,3 +50,8 @@ class RFSwitch():
         except Exception:
             return False
         return True
+
+class FilterSwitch(RFSwitch):
+    def __init__(self, input_switch_pinout, output_switch_pinout, switch_truth_table):
+        self.input_switch = RFSwitch(input_switch_pinout, switch_truth_table)
+        self.output_switch = RFSwitch(output_switch_pinout, switch_truth_table)

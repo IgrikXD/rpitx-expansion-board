@@ -32,7 +32,7 @@ class UserInterface:
             exit(0)
         return selected_board[0]
     
-    def chooseAction(self):
+    def chooseMenuItem(self):
         return self.whiptail_interface.menu("Choose an action:", self.configuration_actions)
         
     def displayInfo(self, info):
@@ -65,25 +65,54 @@ class UserInterface:
         
         self.whiptail_interface.msgbox(f"Configuration saved!\nFile: {file_path}")
 
-    def chooseActiveFilter(self, device):
-        filter_names = [f"Filter {i + 1}: {filter_obj.model_number}, {filter_obj.description}" for i, filter_obj in enumerate(device.filters)]
+    def createActionsList(self, device):
+        actions_list = [] 
+        for i, filter_obj in enumerate(device.filters):
+            actions_list.append(f"Activate filter {i + 1}: {filter_obj.model_number}, {filter_obj.description}")
+        if (device.lna != None):
+                actions_list.append(f"Toogle LNA state: {device.lna.model_number}, {device.lna.description}")
+        
+        return actions_list
+
+    def updateBoardInfo(self, active_filter, is_lna_activated, device):
+        board_status = f"Active filter: {active_filter}\n"
+        if (device.lna != None):
+            board_status += f"Is LNA active: {is_lna_activated}\n"
+        board_status += "Select an available action:"
+
+        return board_status
+
+    def chooseBoardAction(self, device):
+
+        actions_list = self.createActionsList(device)
+        
         active_filter = "Not selected!"
+        is_lna_activated = False
 
         while True:
-            active_filter_choice = self.whiptail_interface.radiolist(f"Current active filter: {active_filter}\nChoose different filter:", filter_names)
-            current_filter = ' '.join(active_filter_choice[0])
+            
+            board_status = self.updateBoardInfo(active_filter, is_lna_activated, device)
 
-            if (active_filter_choice[1] == OK_BUTTON) and (len(current_filter) == 0):
-                # <OK> has been pressed
-                self.whiptail_interface.msgbox("You have not selected a filter to activate!")
-            elif (active_filter_choice[1] == CANCEL_BUTTON):
+            action_choice = self.whiptail_interface.radiolist(board_status, actions_list)
+
+            if (action_choice[1] == OK_BUTTON) and (len(action_choice[0]) == 0):
+                # <OK> has been pressed but no any action choosed
+                self.whiptail_interface.msgbox("You have not selected an action!")
+            elif (action_choice[1] == CANCEL_BUTTON):
                 # <Cancel> button has been pressed
                 self.whiptail_interface.msgbox(FAREWELL_MESSAGE)
                 exit(0)
             else:
-                active_filter = current_filter
-                if (device.enableFilter(filter_names.index(current_filter) + 1)):
-                    self.whiptail_interface.msgbox(f"{current_filter} enabled!")
+                active_filter = ' '.join(action_choice[0])
+                if (action_choice[0][1] == "filter"):
+                    device.enableFilter(actions_list.index(active_filter) + 1)
+                    self.whiptail_interface.msgbox(f"{active_filter} enabled!")
+                elif (action_choice[0][1] == "LNA"):
+                    is_lna_activated = device.toogleLNA()
+                    if (is_lna_activated):
+                        self.whiptail_interface.msgbox(f"LNA enabled!")
+                    else:
+                        self.whiptail_interface.msgbox(f"LNA disabled!")
                 else:
                     self.whiptail_interface.msgbox("Error in device configuration!")
 

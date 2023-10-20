@@ -10,7 +10,7 @@ def main():
 
     while True:
         board = user_interface.chooseBoard()
-        action = user_interface.chooseAction()
+        action = user_interface.chooseMenuItem()
 
         # <Cancel> button has been pressed
         # You will be prompted to select your device again
@@ -31,10 +31,11 @@ def main():
                 continue
         
         device.initFilterRFSwitches(RFSwitch.RF_INPUT_SWITCH_GPIO_PINS, RFSwitch.RF_OUTPUT_SWITCH_GPIO_PINS, Device.DEVICE_TYPE_MAPPING[board][1])
+        device.initLNA()
         # Displaying text information about the active device configuration
         user_interface.displayInfo(device.getConfigurationInfo())
-        # The main application menu, allowing you to select and enable a specific filter
-        user_interface.chooseActiveFilter(device)
+        # The main application menu, allowing you to select and enable a specific filter or toogle LNA state
+        user_interface.chooseBoardAction(device)
     # End of while loop
 
 if __name__ == "__main__":
