@@ -22,9 +22,9 @@ class Device:
     def __init__(self, model_name):
         self.model_name = model_name
         self.filters = []
+        self.filters_amount = self.DEVICE_TYPE_MAPPING[model_name][0]
         self.filers_input_switch = None
         self.filers_output_switch = None
-        self.filters_amount = self.DEVICE_TYPE_MAPPING[model_name][0]
 
     def initFilterRFSwitches(self, input_switch_pinout, output_switch_pinout, switch_truth_table):
         if (self.filers_input_switch == None and self.filers_output_switch == None):
@@ -33,7 +33,12 @@ class Device:
 
     def enableFilter(self, filter_index):
         if (self.filers_input_switch != None and self.filers_input_switch != None):
-            return (self.filers_input_switch.activateRFOutput(filter_index) and self.filers_output_switch.activateRFOutput(filter_index))
+            # We activate two switches at the same time because we need to create a 
+            # path for the signal to pass through a particular filter. This is 
+            # achieved by sending the output signal to the input switch, passing 
+            # it through a filter and then exiting through the output switch
+            return (self.filers_input_switch.activateRFOutput(filter_index) 
+                    and self.filers_output_switch.activateRFOutput(filter_index))
         return False
     
     def getConfigurationInfo(self):
