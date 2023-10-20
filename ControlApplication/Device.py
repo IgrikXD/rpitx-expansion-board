@@ -32,13 +32,13 @@ class Device:
         self.lna_switch = None
 
     def initFilterRFSwitches(self, input_switch_pinout, output_switch_pinout, switch_truth_table):
-        if (self.filter_switch == None):
+        if self.filter_switch is None:
             self.filter_switch = FilterSwitch(input_switch_pinout, output_switch_pinout, switch_truth_table)
 
     def initLNA(self, input_switch_pinout, output_switch_pinout, switch_truth_table):
-        if (switch_truth_table != None):
-            if (self.lna_switch == None):
-                self.lna_switch = LNASwitch(input_switch_pinout, output_switch_pinout, switch_truth_table)
+        if switch_truth_table and self.lna_switch is None:
+            self.lna_switch = LNASwitch(input_switch_pinout, output_switch_pinout, switch_truth_table)
+
     
     def getConfigurationInfo(self):
         delimiter = "=" * 60

@@ -113,7 +113,7 @@ class UserInterface:
                         self.whiptail_interface.msgbox("Error in device configuration!")
                 
                 elif (action_choice[USER_CHOICE][1] == "LNA"):
-                    is_lna_activated = device.lna_switch.toogleLNA()
+                    is_lna_activated = device.lna_switch.toggleLNA()
                     if (is_lna_activated):
                         self.whiptail_interface.msgbox(f"LNA enabled!")
                     else:

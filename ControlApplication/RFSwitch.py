@@ -84,15 +84,12 @@ class LNASwitch(RFSwitchContainer):
         super().__init__(input_switch_pinout, output_switch_pinout, switch_truth_table)
         self.is_active = False
 
-    def toogleLNA(self):
-        # Toogle is_active value
+    def toggleLNA(self):
+        # Toggle is_active value
         self.is_active = not self.is_active  
-        if self.is_active:
-            activation_status = self.activateRFPath(2)
-        else:
-            activation_status = self.activateRFPath(1)
-
-        if activation_status == False:
+        activation_status = self.activateRFPath(2 if self.is_active else 1)
+        
+        if not activation_status:
             self.is_active = False
-
+        
         return self.is_active
