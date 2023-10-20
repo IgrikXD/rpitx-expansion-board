@@ -1,13 +1,11 @@
 from Device import *
 from Filter import *
+from RFSwitch import *
 from UserInterface import *
-
-# Directory with .csv files containing models of all filters available for use
-FILTER_MODELS_DIR = "./FiltersList"
 
 def main():
 
-    filters_list = FiltersList(FILTER_MODELS_DIR)
+    filters_list = FiltersList(Filter.FILTER_MODELS_DIR)
     user_interface = UserInterface(Device.DEVICES_LIST, UserInterface.CONFIGURATION_ACTIONS)
 
     while True:

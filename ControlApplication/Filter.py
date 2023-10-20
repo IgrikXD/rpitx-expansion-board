@@ -1,7 +1,12 @@
 import os
 import pandas
+import pickle
 
 class Filter:
+
+    # Directory with .csv files containing models of all filters available for use
+    FILTER_MODELS_DIR = "./FiltersList"
+
     def __init__(self, model_number, case_style, description, filter_type, passband_f1, passband_f2, stopband_f3, stopband_f4):
         self.model_number = model_number
         self.case_style = case_style
@@ -13,8 +18,19 @@ class Filter:
         self.stopband_f4 = stopband_f4
 
 class FiltersList:
+
+    DUMP_FILENAME = "FiltersListDump.pkl"
+
     def __init__(self, filter_models_dir):
-        self.data = self.getFiltersList(filter_models_dir)
+        dump_file_path = os.path.join(filter_models_dir, self.DUMP_FILENAME)
+        
+        if os.path.exists(dump_file_path):
+            self.data = self.loadFromDump(dump_file_path)
+        else:
+            self.data = self.getFiltersList(filter_models_dir)
+        
+            with open(dump_file_path, 'wb') as filter_list_dump_file:
+                pickle.dump(self.data, filter_list_dump_file)
 
     def getFiltersList(self, filter_models_dir):
         filters = []
@@ -36,3 +52,7 @@ class FiltersList:
                     filters.append(filter_obj)
         
         return filters
+
+    def loadFromDump(self, dump_file_path):
+        with open(dump_file_path, 'rb') as filters_list_dump_file:
+            return pickle.load(filters_list_dump_file)
