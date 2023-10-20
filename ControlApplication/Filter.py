@@ -3,7 +3,6 @@ import pandas
 import pickle
 
 class Filter:
-
     # Directory with .csv files containing models of all filters available for use
     FILTER_MODELS_DIR = "./FiltersList"
 
@@ -23,22 +22,25 @@ class FiltersList:
 
     def __init__(self, filter_models_dir):
         dump_file_path = os.path.join(filter_models_dir, self.DUMP_FILENAME)
-        
+        # We save the state of the object after its first initialization, 
+        # this saves time on re-reading .csv files. When we try to initialize 
+        # the list of available filters, we try to restore its state - 
+        # if restoration fails, we form the list again
         if os.path.exists(dump_file_path):
-            self.data = self.loadFromDump(dump_file_path)
+            self.data = self.loadDump(dump_file_path)
         else:
             self.data = self.getFiltersList(filter_models_dir)
-        
-            with open(dump_file_path, 'wb') as filter_list_dump_file:
-                pickle.dump(self.data, filter_list_dump_file)
+            self.saveSump(dump_file_path)
 
     def getFiltersList(self, filter_models_dir):
         filters = []
 
         for filters_info_filename in os.listdir(filter_models_dir):
+            
             if filters_info_filename.endswith('.csv'):
                 filters_info_path = os.path.join(filter_models_dir, filters_info_filename)
                 df = pandas.read_csv(filters_info_path)
+             
                 for _, row in df.iterrows():
                     filter_obj = Filter(
                         row['Model Number'],
@@ -53,6 +55,12 @@ class FiltersList:
         
         return filters
 
-    def loadFromDump(self, dump_file_path):
+    def loadDump(self, dump_file_path):
+        
         with open(dump_file_path, 'rb') as filters_list_dump_file:
             return pickle.load(filters_list_dump_file)
+        
+    def saveSump(self, dump_fle_path):
+
+        with open(dump_fle_path, 'wb') as filter_list_dump_file:
+                pickle.dump(self.data, filter_list_dump_file)
