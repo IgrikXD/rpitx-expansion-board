@@ -32,6 +32,7 @@ def main():
             if device == None:
                 continue
         
+        device.initFilterRFSwitches(RFSwitch.RF_INPUT_SWITCH_PINOUT, RFSwitch.RF_OUTPUT_SWITCH_PINOUT, Device.DEVICE_TYPE_MAPPING[board][1])
         # Displaying text information about the active device configuration
         user_interface.displayInfo(device.getConfigurationInfo())
         # The main application menu, allowing you to select and enable a specific filter
