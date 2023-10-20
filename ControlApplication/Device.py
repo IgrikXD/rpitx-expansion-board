@@ -78,5 +78,4 @@ class Device:
             configuration_info += f"Stopband F4: {filter_obj.stopband_f4} MHz\n"
             configuration_info += delimiter
 
-
         return configuration_info

@@ -1,16 +1,20 @@
-from Amplifier import *
 from Device import *
-from Filter import *
 from RFSwitch import *
 from UserInterface import *
+from Components import *
 
 FILTERS_SWITCH_TRUTH_TABLE = 1
 LNA_SWITCH_TRUTH_TABLE = 2
 
+AMPLIFIER_MODELS_DIR = "./AmplifiersList"
+FILTER_MODELS_DIR = "./FiltersList"
+FILTER_DUMP_FILE = "FiltersListDump.pkl"
+AMPLIFIER_DUMP_FILE = "AmplifierDump.pkl"
+
 def main():
 
-    filters_list = FiltersList(Filter.FILTER_MODELS_DIR)
-    amplifiers_list = AmplifiersList(Amplifier.AMPLIFIER_MODELS_DIR)
+    filters_list = ComponentsList(ComponentsList.FILTER, FILTER_MODELS_DIR, FILTER_DUMP_FILE)
+    amplifiers_list = ComponentsList(ComponentsList.AMPLIFIER, AMPLIFIER_MODELS_DIR, AMPLIFIER_DUMP_FILE)
     user_interface = UserInterface(Device.DEVICES_LIST, UserInterface.CONFIGURATION_ACTIONS)
 
     while True:

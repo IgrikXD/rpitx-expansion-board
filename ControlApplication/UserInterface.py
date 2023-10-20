@@ -1,5 +1,6 @@
 from Device import *
-from Filter import *
+import os
+import pickle
 from whiptail import Whiptail
 
 OK_BUTTON = 0
@@ -32,7 +33,7 @@ class UserInterface:
         if(selected_board[BUTTONS_STATE] == CANCEL_BUTTON):
             self.whiptail_interface.msgbox(FAREWELL_MESSAGE)
             exit(0)
-        return selected_board[0]
+        return selected_board[USER_CHOICE]
     
     def chooseAction(self):
         return self.whiptail_interface.menu("Choose an action:", self.configuration_actions)
