@@ -56,6 +56,17 @@ class Device:
         delimiter = "=" * 60
         configuration_info = f"{delimiter}\nActive board configuration:\n"
         configuration_info += f"{delimiter}\nChoosed board: {self.model_name}\n"
+        
+        if self.lna:
+            configuration_info += delimiter
+            configuration_info += f"\nAmplifier:\n"
+            configuration_info += f"Model Number: {self.lna[0].model_number}\n"
+            configuration_info += f"Case Style: {self.lna[0].case_style}\n"
+            configuration_info += f"Description: {self.lna[0].description}\n"
+            configuration_info += f"F Low: {self.lna[0].f_low}\n"
+            configuration_info += f"F High: {self.lna[0].f_high} MHz\n"
+            configuration_info += f"Gain Typ: {self.lna[0].gain} dB\n"
+
         configuration_info += f"{delimiter}\nChoosed filters:\n"
         configuration_info += delimiter
         for i, filter_obj in enumerate(self.filters, start=1):
@@ -70,13 +81,5 @@ class Device:
             configuration_info += f"Stopband F4: {filter_obj.stopband_f4} MHz\n"
             configuration_info += delimiter
 
-        if self.lna:
-            configuration_info += f"\nAmplifier:\n"
-            configuration_info += f"Model Number: {self.lna[0].model_number}\n"
-            configuration_info += f"Case Style: {self.lna[0].case_style}\n"
-            configuration_info += f"Description: {self.lna[0].description}\n"
-            configuration_info += f"F Low: {self.lna[0].f_low}\n"
-            configuration_info += f"F High: {self.lna[0].f_high} MHz\n"
-            configuration_info += f"Gain Typ: {self.lna[0].gain} dB\n"
-            configuration_info += delimiter
+
         return configuration_info

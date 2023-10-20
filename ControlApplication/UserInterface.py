@@ -4,6 +4,8 @@ from whiptail import Whiptail
 
 OK_BUTTON = 0
 CANCEL_BUTTON = 1
+BUTTONS_STATE = 1
+USER_CHOICE = 0
 
 CONFIGS_DIR = "./SavedConfiguration/"
 
@@ -27,12 +29,12 @@ class UserInterface:
     def chooseBoard(self):
         selected_board = self.whiptail_interface.menu("Choose your board:", self.devices_list)
         # <Cancel> button has been pressed
-        if(selected_board[1] == CANCEL_BUTTON):
+        if(selected_board[BUTTONS_STATE] == CANCEL_BUTTON):
             self.whiptail_interface.msgbox(FAREWELL_MESSAGE)
             exit(0)
         return selected_board[0]
     
-    def chooseMenuItem(self):
+    def chooseAction(self):
         return self.whiptail_interface.menu("Choose an action:", self.configuration_actions)
         
     def displayInfo(self, info):
@@ -42,12 +44,12 @@ class UserInterface:
         while True:
             configuration_path = self.whiptail_interface.inputbox("Enter the path of the configuration file:", f"{CONFIGS_DIR}{selected_board}.pkl")
             # <Cancel> button has been pressed
-            if(configuration_path[1] == CANCEL_BUTTON):
+            if(configuration_path[BUTTONS_STATE] == CANCEL_BUTTON):
                 self.whiptail_interface.msgbox("Configuration not loaded! Please choose another board.")
                 return None
             else:
                 try:
-                    with open(configuration_path[0], 'rb') as device_configuration_file:
+                    with open(configuration_path[USER_CHOICE], 'rb') as device_configuration_file:
                         device = pickle.load(device_configuration_file)
                     self.whiptail_interface.msgbox("Configuration loaded succesfully!")
                     return device
@@ -94,22 +96,22 @@ class UserInterface:
             board_status = self.updateBoardInfo(active_filter, is_lna_activated, device)
             action_choice = self.whiptail_interface.radiolist(board_status, actions_list)
 
-            if (action_choice[1] == OK_BUTTON) and (len(action_choice[0]) == 0):
+            if (action_choice[BUTTONS_STATE] == OK_BUTTON) and (len(action_choice[USER_CHOICE]) == 0):
                 # <OK> has been pressed but no any action choosed
                 self.whiptail_interface.msgbox("You have not selected an action!")
-            elif (action_choice[1] == CANCEL_BUTTON):
+            elif (action_choice[BUTTONS_STATE] == CANCEL_BUTTON):
                 # <Cancel> button has been pressed
                 self.whiptail_interface.msgbox(FAREWELL_MESSAGE)
                 exit(0)
             else:
-                if (action_choice[0][1] == "filter"):
-                    active_filter = f"{action_choice[0][2][0]} - {' '.join(action_choice[0][3:])}"
+                if (action_choice[USER_CHOICE][1] == "filter"):
+                    active_filter = f"{action_choice[USER_CHOICE][2][0]} - {' '.join(action_choice[USER_CHOICE][3:])}"
                     if (device.enableFilter(int(action_choice[0][2][0]))):
                         self.whiptail_interface.msgbox(f"Filter {active_filter} enabled!")
                     else:
                         self.whiptail_interface.msgbox("Error in device configuration!")
                 
-                elif (action_choice[0][1] == "LNA"):
+                elif (action_choice[USER_CHOICE][1] == "LNA"):
                     is_lna_activated = device.lna_switch.toogleLNA()
                     if (is_lna_activated):
                         self.whiptail_interface.msgbox(f"LNA enabled!")
@@ -125,7 +127,7 @@ class UserInterface:
             filter_case = self.whiptail_interface.menu(f"Choose case for filter {i + 1} from {device.DEVICE_TYPE_MAPPING[selected_board][0]}:", unique_case_styles)
 
             # <Cancel> button has been pressed
-            if(filter_case[1] == CANCEL_BUTTON):
+            if(filter_case[BUTTONS_STATE] == CANCEL_BUTTON):
                 self.whiptail_interface.msgbox(CONFIGURATION_CREATED_ABORTED)
                 return None
             
@@ -136,7 +138,7 @@ class UserInterface:
             filter_model = self.whiptail_interface.menu(f"Avaliable filter models for '{selected_case_style}' case:", available_model_numbers)
 
             # <Cancel> button has been pressed
-            if(filter_model[1] == CANCEL_BUTTON):
+            if(filter_model[BUTTONS_STATE] == CANCEL_BUTTON):
                 self.whiptail_interface.msgbox(CONFIGURATION_CREATED_ABORTED)
                 return None
 
@@ -155,22 +157,22 @@ class UserInterface:
             filter_case = self.whiptail_interface.menu(f"Choose case for amplifier:", unique_case_styles)
 
             # <Cancel> button has been pressed
-            if(filter_case[1] == CANCEL_BUTTON):
+            if(filter_case[BUTTONS_STATE] == CANCEL_BUTTON):
                 self.whiptail_interface.msgbox(CONFIGURATION_CREATED_ABORTED)
                 return None
             
-            case_style_choice = unique_case_styles.index(filter_case[0])
+            case_style_choice = unique_case_styles.index(filter_case[USER_CHOICE])
             selected_case_style = unique_case_styles[case_style_choice]
 
             available_model_numbers = [amplifier.model_number for amplifier in amplifier_objects if amplifier.case_style == selected_case_style]
             amplifier_model = self.whiptail_interface.menu(f"Avaliable amplifier models for '{selected_case_style}' case:", available_model_numbers)
 
             # <Cancel> button has been pressed
-            if(amplifier_model[1] == CANCEL_BUTTON):
+            if(amplifier_model[BUTTONS_STATE] == CANCEL_BUTTON):
                 self.whiptail_interface.msgbox(CONFIGURATION_CREATED_ABORTED)
                 return None
 
-            model_number_choice = available_model_numbers.index(amplifier_model[0])
+            model_number_choice = available_model_numbers.index(amplifier_model[USER_CHOICE])
             selected_model_number = available_model_numbers[model_number_choice]
 
             # We find a filter that matches the parameters in the list of all available filters, 
