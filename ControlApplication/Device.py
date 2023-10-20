@@ -2,7 +2,6 @@ import os
 import pickle
 
 from RFSwitch import *
-from LNA import *
 
 class Device:
     # List of available device for operation
@@ -16,51 +15,41 @@ class Device:
     ]
     
     # Matching a specific device with its configuration
-    # <DEVICE> : (<NUMBER OF AVAILABLE FILTERS>, <RF SWITCH TRUTH TABLE>, <IS LNA SUPPORTED>)
+    # <DEVICE> : (<NUMBER OF AVAILABLE FILTERS>, <FILTER SWITCH TRUTH TABLE>, <LNA SWITCH THRUTH TABLE>)
     DEVICE_TYPE_MAPPING = {
         # Boards without LNA
-        DEVICES_LIST[0]: (3, RFSwitch.SP3T_SWITCH_TRUTH_TABLE, False),
-        DEVICES_LIST[1]: (4, RFSwitch.SP4T_SWITCH_TRUTH_TABLE, False),
-        DEVICES_LIST[2]: (6, RFSwitch.SP6T_SWITCH_TRUTH_TABLE, False),
+        DEVICES_LIST[0]: (3, RFSwitch.SP3T_SWITCH_TRUTH_TABLE, None),
+        DEVICES_LIST[1]: (4, RFSwitch.SP4T_SWITCH_TRUTH_TABLE, None),
+        DEVICES_LIST[2]: (6, RFSwitch.SP6T_SWITCH_TRUTH_TABLE, None),
         # Boards with LNA
-        DEVICES_LIST[3]: (3, RFSwitch.SP3T_SWITCH_TRUTH_TABLE, True),
-        DEVICES_LIST[4]: (4, RFSwitch.SP4T_SWITCH_TRUTH_TABLE, True),
-        DEVICES_LIST[5]: (6, RFSwitch.SP6T_SWITCH_TRUTH_TABLE, True)
+        DEVICES_LIST[3]: (3, RFSwitch.SP3T_SWITCH_TRUTH_TABLE, RFSwitch.SPDT_SWITCH_TRUTH_TABLE),
+        DEVICES_LIST[4]: (4, RFSwitch.SP4T_SWITCH_TRUTH_TABLE, RFSwitch.SPDT_SWITCH_TRUTH_TABLE),
+        DEVICES_LIST[5]: (6, RFSwitch.SP6T_SWITCH_TRUTH_TABLE, RFSwitch.SPDT_SWITCH_TRUTH_TABLE)
     }
 
     def __init__(self, model_name):
         self.model_name = model_name
         self.filters = []
-        self.filters_amount = self.DEVICE_TYPE_MAPPING[model_name][0]
-        self.filers_input_switch = None
-        self.filers_output_switch = None
-        self.lna = None
+        self.filter_switch = None
+        self.lna = []
+        self.lna_switch = None
 
     def initFilterRFSwitches(self, input_switch_pinout, output_switch_pinout, switch_truth_table):
-        if (self.filers_input_switch == None and self.filers_output_switch == None):
-            self.filers_input_switch = RFSwitch(input_switch_pinout, switch_truth_table)
-            self.filers_output_switch = RFSwitch(output_switch_pinout, switch_truth_table)
+        if (self.filter_switch == None):
+            self.filter_switch = FilterSwitch(input_switch_pinout, output_switch_pinout, switch_truth_table)
 
     def initLNA(self, input_switch_pinout, output_switch_pinout, switch_truth_table):
-        if (self.lna == None):
-            
-            self.lna = LNA("PGA-103", "SOME DESCRIPTION")
-    
-    def toogleLNA(self):
-        if (self.lna.is_active == True):
-            self.lna.is_active = False
-        else:
-            self.lna.is_active = True
-        return self.lna.is_active
+        if (switch_truth_table != None):
+            if (self.lna_switch == None):
+                self.lna_switch = LNASwitch(input_switch_pinout, output_switch_pinout, switch_truth_table)
 
     def enableFilter(self, filter_index):
-        if (self.filers_input_switch != None and self.filers_input_switch != None):
+        if (self.filter_switch != None):
             # We activate two switches at the same time because we need to create a 
             # path for the signal to pass through a particular filter. This is 
             # achieved by sending the output signal to the input switch, passing 
             # it through a filter and then exiting through the output switch
-            return (self.filers_input_switch.activateRFOutput(filter_index) 
-                    and self.filers_output_switch.activateRFOutput(filter_index))
+            return self.filter_switch.activateRFPath(filter_index) 
         return False
     
     def getConfigurationInfo(self):
@@ -81,4 +70,13 @@ class Device:
             configuration_info += f"Stopband F4: {filter_obj.stopband_f4} MHz\n"
             configuration_info += delimiter
 
+        if self.lna:
+            configuration_info += f"\nAmplifier:\n"
+            configuration_info += f"Model Number: {self.lna[0].model_number}\n"
+            configuration_info += f"Case Style: {self.lna[0].case_style}\n"
+            configuration_info += f"Description: {self.lna[0].description}\n"
+            configuration_info += f"F Low: {self.lna[0].f_low}\n"
+            configuration_info += f"F High: {self.lna[0].f_high} MHz\n"
+            configuration_info += f"Gain Typ: {self.lna[0].gain} dB\n"
+            configuration_info += delimiter
         return configuration_info

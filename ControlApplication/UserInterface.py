@@ -69,15 +69,15 @@ class UserInterface:
         actions_list = [] 
         for i, filter_obj in enumerate(device.filters):
             actions_list.append(f"Activate filter {i + 1}: {filter_obj.model_number}, {filter_obj.description}")
-        if (device.lna != None):
-                actions_list.append(f"Toogle LNA state: {device.lna.model_number}, {device.lna.description}")
+        if (device.lna_switch != None):
+                actions_list.append(f"Toogle LNA state: {device.lna[0].model_number}, {device.lna[0].description}")
         
         return actions_list
 
     def updateBoardInfo(self, active_filter, is_lna_activated, device):
         board_status = f"Active filter: {active_filter}\n"
-        if (device.lna != None):
-            board_status += f"Is LNA active: {is_lna_activated}\n"
+        if (device.lna_switch != None):
+            board_status += f"Is LNA active: {is_lna_activated}!\n"
         board_status += "Select an available action:"
 
         return board_status
@@ -92,7 +92,6 @@ class UserInterface:
         while True:
             
             board_status = self.updateBoardInfo(active_filter, is_lna_activated, device)
-
             action_choice = self.whiptail_interface.radiolist(board_status, actions_list)
 
             if (action_choice[1] == OK_BUTTON) and (len(action_choice[0]) == 0):
@@ -103,26 +102,27 @@ class UserInterface:
                 self.whiptail_interface.msgbox(FAREWELL_MESSAGE)
                 exit(0)
             else:
-                active_filter = ' '.join(action_choice[0])
                 if (action_choice[0][1] == "filter"):
-                    device.enableFilter(actions_list.index(active_filter) + 1)
-                    self.whiptail_interface.msgbox(f"{active_filter} enabled!")
+                    active_filter = f"{action_choice[0][2][0]} - {' '.join(action_choice[0][3:])}"
+                    if (device.enableFilter(int(action_choice[0][2][0]))):
+                        self.whiptail_interface.msgbox(f"Filter {active_filter} enabled!")
+                    else:
+                        self.whiptail_interface.msgbox("Error in device configuration!")
+                
                 elif (action_choice[0][1] == "LNA"):
-                    is_lna_activated = device.toogleLNA()
+                    is_lna_activated = device.lna_switch.toogleLNA()
                     if (is_lna_activated):
                         self.whiptail_interface.msgbox(f"LNA enabled!")
                     else:
                         self.whiptail_interface.msgbox(f"LNA disabled!")
-                else:
-                    self.whiptail_interface.msgbox("Error in device configuration!")
 
-    def createConfiguration(self, selected_board, filter_objects):
+    def createConfiguration(self, selected_board, filter_objects, amplifier_objects):
         device = Device(selected_board)
 
-        for i in range(device.filters_amount):
+        for i in range(device.DEVICE_TYPE_MAPPING[selected_board][0]):
             
             unique_case_styles = sorted(set(filter.case_style for filter in filter_objects))
-            filter_case = self.whiptail_interface.menu(f"Choose case for filter {i + 1} from {device.filters_amount}:", unique_case_styles)
+            filter_case = self.whiptail_interface.menu(f"Choose case for filter {i + 1} from {device.DEVICE_TYPE_MAPPING[selected_board][0]}:", unique_case_styles)
 
             # <Cancel> button has been pressed
             if(filter_case[1] == CANCEL_BUTTON):
@@ -149,5 +149,35 @@ class UserInterface:
                 if (filter.model_number == selected_model_number) and (filter.case_style == selected_case_style):
                     device.filters.append(filter)
                     break
+            
+        if "LNA" in selected_board:
+            unique_case_styles = sorted(set(amplifier.case_style for amplifier in amplifier_objects))
+            filter_case = self.whiptail_interface.menu(f"Choose case for amplifier:", unique_case_styles)
 
+            # <Cancel> button has been pressed
+            if(filter_case[1] == CANCEL_BUTTON):
+                self.whiptail_interface.msgbox(CONFIGURATION_CREATED_ABORTED)
+                return None
+            
+            case_style_choice = unique_case_styles.index(filter_case[0])
+            selected_case_style = unique_case_styles[case_style_choice]
+
+            available_model_numbers = [amplifier.model_number for amplifier in amplifier_objects if amplifier.case_style == selected_case_style]
+            amplifier_model = self.whiptail_interface.menu(f"Avaliable amplifier models for '{selected_case_style}' case:", available_model_numbers)
+
+            # <Cancel> button has been pressed
+            if(amplifier_model[1] == CANCEL_BUTTON):
+                self.whiptail_interface.msgbox(CONFIGURATION_CREATED_ABORTED)
+                return None
+
+            model_number_choice = available_model_numbers.index(amplifier_model[0])
+            selected_model_number = available_model_numbers[model_number_choice]
+
+            # We find a filter that matches the parameters in the list of all available filters, 
+            # and add it to the list of filters for a specific device
+            for amplifier in amplifier_objects:
+                if (amplifier.model_number == selected_model_number) and (amplifier.case_style == selected_case_style):
+                    device.lna.append(amplifier)
+                    break
+    
         return device
