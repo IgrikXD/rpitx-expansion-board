@@ -27,19 +27,19 @@ class UserInterface:
         self.devices_list = devices_list
         self.configuration_actions = configuration_actions
 
+    def chooseAction(self):
+        return self.whiptail_interface.menu("Choose an action:", self.configuration_actions)
+
+    def displayInfo(self, info):
+        self.whiptail_interface.msgbox(info)
+
     def chooseBoard(self):
         selected_board = self.whiptail_interface.menu("Choose your board:", self.devices_list)
         # <Cancel> button has been pressed
         if (selected_board[BUTTONS_STATE] == CANCEL_BUTTON):
-            self.whiptail_interface.msgbox(FAREWELL_MESSAGE)
+            self.displayInfo(FAREWELL_MESSAGE)
             exit(0)
         return selected_board[USER_CHOICE]
-    
-    def chooseAction(self):
-        return self.whiptail_interface.menu("Choose an action:", self.configuration_actions)
-        
-    def displayInfo(self, info):
-        self.whiptail_interface.msgbox(info)
 
     def loadDeviceConfiguration(self, selected_board):
         while True:
@@ -48,18 +48,18 @@ class UserInterface:
             
             # <Cancel> button has been pressed
             if(configuration_path[BUTTONS_STATE] == CANCEL_BUTTON):
-                self.whiptail_interface.msgbox("Configuration not loaded! Please choose another board.")
+                self.displayInfo("Configuration not loaded! Please choose another board.")
                 return None
             
             try:
                 with open(configuration_path[USER_CHOICE], 'rb') as device_configuration_file:
                     device = pickle.load(device_configuration_file)
-                self.whiptail_interface.msgbox("Configuration loaded succesfully!")
+                self.displayInfo("Configuration loaded succesfully!")
                 return device
             
             except FileNotFoundError:
                 # You will be prompted to enter the new file path
-                self.whiptail_interface.msgbox("Configuration file not found!")
+                self.displayInfo("Configuration file not found!")
 
     def saveDeviceConfiguration(self, device):
         os.makedirs(CONFIGS_DIR, exist_ok=True)
@@ -69,7 +69,7 @@ class UserInterface:
         with open(file_path, 'wb') as device_configuration_file:
             pickle.dump(device, device_configuration_file)
         
-        self.whiptail_interface.msgbox(f"Configuration saved!\nFile: {file_path}")
+        self.displayInfo(f"Configuration saved!\nFile: {file_path}")
 
     def createActionsList(self, device):
         actions_list = [(f"Activate filter {i + 1}", f"{filter_obj.model_number}, {filter_obj.description}") 
@@ -103,7 +103,7 @@ class UserInterface:
 
             if (action_choice[BUTTONS_STATE] == CANCEL_BUTTON):
                 # <Cancel> button has been pressed
-                self.whiptail_interface.msgbox(FAREWELL_MESSAGE)
+                self.displayInfo(FAREWELL_MESSAGE)
                 exit(0)
             else:
                 user_choice = action_choice[USER_CHOICE]
@@ -116,77 +116,51 @@ class UserInterface:
                     active_filter = f"{filter_id} - {filter_description}"
 
                     if device.filter_switch.enableFilter(filter_id):
-                        self.whiptail_interface.msgbox(f"Filter {active_filter} enabled!")
+                        self.displayInfo(f"Filter {active_filter} enabled!")
                     else:
-                        self.whiptail_interface.msgbox("Error in device configuration!")
+                        self.displayInfo("Error in device configuration!")
                 
                 elif "Toggle LNA" in user_choice:
                     is_lna_activated = device.lna_switch.toggleLNA()
-                    self.whiptail_interface.msgbox("LNA enabled!" if is_lna_activated else "LNA disabled!")
+                    self.displayInfo("LNA enabled!" if is_lna_activated else "LNA disabled!")
+
+    def selectComponent(self, components_list, prompt):
+        unique_case_styles = sorted(set(component.case_style for component in components_list))
+        case_style_choice = self.whiptail_interface.menu(prompt, unique_case_styles)
+
+        if case_style_choice[BUTTONS_STATE] == CANCEL_BUTTON:
+            self.displayInfo(CONFIGURATION_CREATED_ABORTED)
+            return None
+
+        selected_case_style = case_style_choice[USER_CHOICE]
+
+        available_model_numbers = [component.model_number for component in components_list if component.case_style == selected_case_style]
+        model_choice = self.whiptail_interface.menu(f"Available models for '{selected_case_style}' case:", available_model_numbers)
+
+        if model_choice[BUTTONS_STATE] == CANCEL_BUTTON:
+            self.displayInfo(CONFIGURATION_CREATED_ABORTED)
+            return None
+
+        selected_model_number = model_choice[USER_CHOICE]
+
+        for component in components_list:
+            if (component.model_number == selected_model_number) and (component.case_style == selected_case_style):
+                return component
 
     def createConfiguration(self, selected_board, filter_objects, amplifier_objects):
         device = Device(selected_board)
 
         for i in range(device.DEVICE_TYPE_MAPPING[selected_board][0]):
-            
-            unique_case_styles = sorted(set(filter.case_style for filter in filter_objects))
-            filter_case = self.whiptail_interface.menu(f"Choose case for filter {i + 1} from 
-                                                       {device.DEVICE_TYPE_MAPPING[selected_board][0]}:", unique_case_styles)
-
-            # <Cancel> button has been pressed
-            if(filter_case[BUTTONS_STATE] == CANCEL_BUTTON):
-                self.whiptail_interface.msgbox(CONFIGURATION_CREATED_ABORTED)
+            selected_filter = self.selectComponent(filter_objects, f"Choose filter case for filter {i + 1} from {device.DEVICE_TYPE_MAPPING[selected_board][0]}:")
+            if selected_filter is None:
                 return None
-            
-            case_style_choice = unique_case_styles.index(filter_case[0])
-            selected_case_style = unique_case_styles[case_style_choice]
+            device.filters.append(selected_filter)
 
-            available_model_numbers = [filter.model_number for filter in filter_objects if filter.case_style == selected_case_style]
-            filter_model = self.whiptail_interface.menu(f"Avaliable filter models for '{selected_case_style}' case:", available_model_numbers)
-
-            # <Cancel> button has been pressed
-            if(filter_model[BUTTONS_STATE] == CANCEL_BUTTON):
-                self.whiptail_interface.msgbox(CONFIGURATION_CREATED_ABORTED)
-                return None
-
-            model_number_choice = available_model_numbers.index(filter_model[0])
-            selected_model_number = available_model_numbers[model_number_choice]
-
-            # We find a filter that matches the parameters in the list of all available filters, 
-            # and add it to the list of filters for a specific device
-            for filter in filter_objects:
-                if (filter.model_number == selected_model_number) and (filter.case_style == selected_case_style):
-                    device.filters.append(filter)
-                    break
-            
         if "LNA" in selected_board:
-            unique_case_styles = sorted(set(amplifier.case_style for amplifier in amplifier_objects))
-            filter_case = self.whiptail_interface.menu(f"Choose case for amplifier:", unique_case_styles)
-
-            # <Cancel> button has been pressed
-            if(filter_case[BUTTONS_STATE] == CANCEL_BUTTON):
-                self.whiptail_interface.msgbox(CONFIGURATION_CREATED_ABORTED)
+            selected_amplifier = self.selectComponent(amplifier_objects, "Choose amplifier case:")
+            if selected_amplifier is None:
                 return None
-            
-            case_style_choice = unique_case_styles.index(filter_case[USER_CHOICE])
-            selected_case_style = unique_case_styles[case_style_choice]
+            device.lna.append(selected_amplifier)
 
-            available_model_numbers = [amplifier.model_number for amplifier in amplifier_objects if amplifier.case_style == selected_case_style]
-            amplifier_model = self.whiptail_interface.menu(f"Avaliable amplifier models for '{selected_case_style}' case:", available_model_numbers)
-
-            # <Cancel> button has been pressed
-            if(amplifier_model[BUTTONS_STATE] == CANCEL_BUTTON):
-                self.whiptail_interface.msgbox(CONFIGURATION_CREATED_ABORTED)
-                return None
-
-            model_number_choice = available_model_numbers.index(amplifier_model[USER_CHOICE])
-            selected_model_number = available_model_numbers[model_number_choice]
-
-            # We find a filter that matches the parameters in the list of all available filters, 
-            # and add it to the list of filters for a specific device
-            for amplifier in amplifier_objects:
-                if (amplifier.model_number == selected_model_number) and (amplifier.case_style == selected_case_style):
-                    device.lna.append(amplifier)
-                    break
-    
         return device
+
