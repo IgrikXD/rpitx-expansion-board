@@ -1,5 +1,7 @@
+from colorama import Fore, Style
 from gpiozero.pins.mock import MockFactory
 from gpiozero import OutputDevice
+import sys
 
 # Aliases for high and low logic levels
 HIGH = True
@@ -47,12 +49,18 @@ class RFSwitch():
 
     def activateRFOutput(self, rf_output):
         try:
+            if "--show-debug-info" in sys.argv:
+                print(f"{Fore.YELLOW}[INFO]: RF path {rf_output} activated!{Style.RESET_ALL}")
+                print(f"{Fore.YELLOW}[INFO]: START OF CNANGING GPIO STATE{Style.RESET_ALL}")
             for output_gpio_obj, gpio_state in zip(self.switch_control, self.switch_truth_table[rf_output]):
                 output_gpio_obj.value = gpio_state
-                print(f"{output_gpio_obj} {gpio_state}")
+                if "--show-debug-info" in sys.argv:
+                    print(f"{output_gpio_obj} {gpio_state}")
         except Exception:
             return False
-        print("------------------------------------------")
+        if "--show-debug-info" in sys.argv:
+            print(f"{Fore.YELLOW}[INFO]: END OF CHANGING GPIO STATE{Style.RESET_ALL}")
+        
         return True
 
 class RFSwitchContainer(RFSwitch):
