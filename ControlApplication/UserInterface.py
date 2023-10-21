@@ -83,6 +83,7 @@ class UserInterface:
 
     def updateBoardInfo(self, active_filter, is_lna_activated, device):
         board_status = f"Active filter: {active_filter}\n"
+        
         if device.lna_switch is not None:
             board_status += f"Is LNA active: {is_lna_activated}!\n"
         board_status += "Select an available action:"
@@ -111,9 +112,7 @@ class UserInterface:
                 if "Activate filter" in user_choice:
                     filter_id = int(user_choice[-1])
                     device_filter = device.filters[filter_id - 1]
-
-                    filter_description = f"{device_filter.model_number}, {device_filter.description}"
-                    active_filter = f"{filter_id} - {filter_description}"
+                    active_filter = f"{filter_id} - {device_filter.model_number}, {device_filter.description}"
 
                     if device.filter_switch.enableFilter(filter_id):
                         self.displayInfo(f"Filter {active_filter} enabled!")
