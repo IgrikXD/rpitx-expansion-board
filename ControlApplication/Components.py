@@ -1,6 +1,8 @@
+from colorama import Fore, Style
 import os
 import pandas
 import pickle
+import sys
 
 class BaseModel:
     def __init__(self, model_number, case_style, description):
@@ -75,8 +77,12 @@ class ComponentsList:
 
     def loadDump(self, dump_file_path):
         with open(dump_file_path, 'rb') as model_list_dump_file:
+            if "--show-debug-info" in sys.argv:
+                print(f"{Fore.YELLOW}[INFO]: Dump loaded: {dump_file_path}{Style.RESET_ALL}")
             return pickle.load(model_list_dump_file)
 
     def saveDump(self, dump_file_path):
         with open(dump_file_path, 'wb') as model_list_dump_file:
             pickle.dump(self.data, model_list_dump_file)
+        if "--show-debug-info" in sys.argv:
+            print(f"{Fore.YELLOW}[INFO]: Dump saved: {dump_file_path}{Style.RESET_ALL}")

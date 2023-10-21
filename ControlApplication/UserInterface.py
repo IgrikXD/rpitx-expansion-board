@@ -54,6 +54,10 @@ class UserInterface:
             try:
                 with open(configuration_path[USER_CHOICE], 'rb') as device_configuration_file:
                     device = pickle.load(device_configuration_file)
+
+                if "--show-debug-info" in sys.argv:
+                    print(f"{Fore.YELLOW}[INFO]: Device configuration loaded: {configuration_path[USER_CHOICE]}{Style.RESET_ALL}")
+
                 self.displayInfo("Configuration loaded succesfully!")
                 return device
             
@@ -68,6 +72,9 @@ class UserInterface:
         
         with open(file_path, 'wb') as device_configuration_file:
             pickle.dump(device, device_configuration_file)
+        
+        if "--show-debug-info" in sys.argv:
+            print(f"{Fore.YELLOW}[INFO]: Device configuration info saved: {file_path}{Style.RESET_ALL}")
         
         self.displayInfo(f"Configuration saved!\nFile: {file_path}")
 

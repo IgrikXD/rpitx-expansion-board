@@ -38,28 +38,45 @@ class RFSwitch():
 
     def __init__(self, switch_pinout, switch_truth_table):
         # Used BCM port numbering by default
-        used_pin_factory = MockFactory()
+        if "--use-mock-gpio" in sys.argv:
+            used_pin_factory = MockFactory()
+            print(f"{Fore.RED}[INFO]: gpiozero used MockFactory for GPIO operation!{Style.RESET_ALL}")
+        else:
+            used_pin_factory = None
+        
         self.switch_pinout = switch_pinout
         self.switch_truth_table = switch_truth_table
-        # used_pin_factory = None
         self.switch_control = [
             OutputDevice(pin=gpio_number, initial_value=HIGH, pin_factory=used_pin_factory)
             for gpio_number in self.switch_pinout
         ]
 
+        if "--show-debug-info" in sys.argv:
+            print(f"{Fore.YELLOW}[INFO]: RFSwitch initialized on GPIO: {switch_pinout}{Style.RESET_ALL}")
+
     def activateRFOutput(self, rf_output):
         try:
             if "--show-debug-info" in sys.argv:
-                print(f"{Fore.YELLOW}[INFO]: RF path {rf_output} activated!{Style.RESET_ALL}")
-                print(f"{Fore.YELLOW}[INFO]: START OF CNANGING GPIO STATE{Style.RESET_ALL}")
+                print(f"{Fore.YELLOW}-------------------------------------------------{Style.RESET_ALL}")
+                print(f"{Fore.GREEN}[INFO]: RF path {rf_output} activated!{Style.RESET_ALL}")
+                print(f"{Fore.YELLOW}-------------------------------------------------{Style.RESET_ALL}")
+                print(f"{Fore.GREEN}[INFO]: START OF CNANGING GPIO STATE{Style.RESET_ALL}")
+            
             for output_gpio_obj, gpio_state in zip(self.switch_control, self.switch_truth_table[rf_output]):
                 output_gpio_obj.value = gpio_state
+                
                 if "--show-debug-info" in sys.argv:
-                    print(f"{output_gpio_obj} {gpio_state}")
+                    if gpio_state:
+                        print(f"{Fore.YELLOW}{output_gpio_obj.pin}: {Fore.GREEN}{gpio_state}{Style.RESET_ALL}")
+                    else:
+                        print(f"{Fore.YELLOW}{output_gpio_obj.pin}: {Fore.RED}{gpio_state}{Style.RESET_ALL}")
+        
         except Exception:
             return False
+        
         if "--show-debug-info" in sys.argv:
-            print(f"{Fore.YELLOW}[INFO]: END OF CHANGING GPIO STATE{Style.RESET_ALL}")
+            print(f"{Fore.GREEN}[INFO]: END OF CHANGING GPIO STATE{Style.RESET_ALL}")
+            print(f"{Fore.YELLOW}-------------------------------------------------{Style.RESET_ALL}\n")
         
         return True
 
