@@ -72,12 +72,12 @@ class UserInterface:
         self.whiptail_interface.msgbox(f"Configuration saved!\nFile: {file_path}")
 
     def createActionsList(self, device):
-        actions_list = [f"Activate filter {i + 1}: {filter_obj.model_number}, {filter_obj.description}" 
-                        for i, filter_obj in enumerate(device.filters)]
+        actions_list = [(f"Activate filter {i + 1}", f"{filter_obj.model_number}, {filter_obj.description}") 
+                    for i, filter_obj in enumerate(device.filters)]
         
         if device.lna_switch is not None:
             lna = device.lna[0]
-            actions_list.append(f"Toggle LNA state: {lna.model_number}, {lna.description}, {lna.f_low} - {lna.f_high} MHz")
+            actions_list.append((f"Toggle LNA state", f"{lna.model_number}, {lna.description}, {lna.f_low} - {lna.f_high} MHz"))
         
         return actions_list
 
@@ -89,69 +89,40 @@ class UserInterface:
 
         return board_status
 
-# ------------------------------------------------------------------------------------
-# ------------------------------------------------------------------------------------
-# ------------------------------------------------------------------------------------
-
     def chooseBoardAction(self, device):
 
-        actions_list = self.createActionsList(device)
+        ACTIONS_LIST = self.createActionsList(device)
         
         active_filter = "Not selected!"
         is_lna_activated = False
 
-        menu_descriptions = self.whiptail_interface.menu(
-		"This is a menu with descriptions.",
-		[("Activate filter 1", "JCBP-290+, Lumped LC Band Pass Filter, 100-480 MHz"), ("Toogle LNA state", "RAM-6A+, Low Noise Amplifier, DC - 2000 MHz")],
-		)
-        print(menu_descriptions)
-
-
         while True:
             
             board_status = self.updateBoardInfo(active_filter, is_lna_activated, device)
-            action_choice = self.whiptail_interface.radiolist(board_status, actions_list)
+            action_choice = self.whiptail_interface.menu(board_status, ACTIONS_LIST)
 
-            if (action_choice[BUTTONS_STATE] == OK_BUTTON) and (not action_choice[USER_CHOICE]):
-                # <OK> has been pressed but no any action choosed
-                self.whiptail_interface.msgbox("You have not selected an action!")
-            elif (action_choice[BUTTONS_STATE] == CANCEL_BUTTON):
+            if (action_choice[BUTTONS_STATE] == CANCEL_BUTTON):
                 # <Cancel> button has been pressed
                 self.whiptail_interface.msgbox(FAREWELL_MESSAGE)
                 exit(0)
             else:
                 user_choice = action_choice[USER_CHOICE]
-                action_type = user_choice[1]
 
-                if action_type == "filter":
-                    filter_id = int(user_choice[2][0])
-                    filter_description = ' '.join(user_choice[3:])
+                if "Activate filter" in user_choice:
+                    filter_id = int(user_choice[-1])
+                    device_filter = device.filters[filter_id - 1]
+
+                    filter_description = f"{device_filter.model_number}, {device_filter.description}"
                     active_filter = f"{filter_id} - {filter_description}"
+
                     if device.filter_switch.enableFilter(filter_id):
                         self.whiptail_interface.msgbox(f"Filter {active_filter} enabled!")
                     else:
                         self.whiptail_interface.msgbox("Error in device configuration!")
-                elif action_type == "LNA":
-                    is_lna_activated = device.lna_switch.toggleLNA()
-                    if is_lna_activated:
-                        self.whiptail_interface.msgbox("LNA enabled!")
-                    else:
-                        self.whiptail_interface.msgbox("LNA disabled!")
-
-
-                # if (action_choice[USER_CHOICE][1] == "filter"):
-                #     active_filter = f"{action_choice[USER_CHOICE][2][0]} - {' '.join(action_choice[USER_CHOICE][3:])}"
-                #     if (device.filter_switch.enableFilter(int(action_choice[0][2][0]))):
-                #         self.whiptail_interface.msgbox(f"Filter {active_filter} enabled!")
-                #     else:
-                #         self.whiptail_interface.msgbox("Error in device configuration!")
                 
-                # elif (action_choice[USER_CHOICE][1] == "LNA"):
-                #     is_lna_activated = device.lna_switch.toggleLNA()
-                #     if (is_lna_activated):
-                #         self.whiptail_interface.msgbox(f"LNA enabled!")
-                #     else:
-                #         self.whiptail_interface.msgbox(f"LNA disabled!")
+                elif "Toggle LNA" in user_choice:
+                    is_lna_activated = device.lna_switch.toggleLNA()
+                    self.whiptail_interface.msgbox("LNA enabled!" if is_lna_activated else "LNA disabled!")
 
     def createConfiguration(self, selected_board, filter_objects, amplifier_objects):
         device = Device(selected_board)
