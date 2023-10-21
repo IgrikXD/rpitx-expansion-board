@@ -1,4 +1,4 @@
-from RFSwitch import *
+from RFSwitch import * 
 
 class Device:
     # List of available device for operation
