@@ -31,11 +31,11 @@ def main():
             device = user_interface.createConfiguration(board, filters_list.data, amplifiers_list.data)
             if device == None:
                 continue
-            user_interface.saveConfiguration(device)
+            user_interface.saveDeviceConfiguration(device)
 
         # "Load device configuration" has been choosen
         if (action[USER_CHOICE] == UserInterface.CONFIGURATION_ACTIONS[1]):
-            device = user_interface.loadConfiguration(board)
+            device = user_interface.loadDeviceConfiguration(board)
             if device == None:
                 continue
         
