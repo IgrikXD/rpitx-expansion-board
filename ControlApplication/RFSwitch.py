@@ -50,34 +50,43 @@ class RFSwitch():
             OutputDevice(pin=gpio_number, initial_value=HIGH, pin_factory=used_pin_factory)
             for gpio_number in self.switch_pinout
         ]
+        self.active_rf_output = None
 
         if "--show-debug-info" in sys.argv:
             print(f"{Fore.YELLOW}[INFO]: RFSwitch initialized on GPIO: {switch_pinout}{Style.RESET_ALL}")
 
     def activateRFOutput(self, rf_output):
-        try:
-            if "--show-debug-info" in sys.argv:
-                print(f"{Fore.YELLOW}-------------------------------------------------{Style.RESET_ALL}")
-                print(f"{Fore.GREEN}[INFO]: RF path {rf_output} activated!{Style.RESET_ALL}")
-                print(f"{Fore.YELLOW}-------------------------------------------------{Style.RESET_ALL}")
-                print(f"{Fore.GREEN}[INFO]: START OF CNANGING GPIO STATE{Style.RESET_ALL}")
-            
-            for output_gpio_obj, gpio_state in zip(self.switch_control, self.switch_truth_table[rf_output]):
-                output_gpio_obj.value = gpio_state
-                
+        if (self.active_rf_output != rf_output or self.active_rf_output == None):
+            try:
+                self.active_rf_output = rf_output
+
                 if "--show-debug-info" in sys.argv:
-                    if gpio_state:
-                        print(f"{Fore.YELLOW}{output_gpio_obj.pin}: {Fore.GREEN}{gpio_state}{Style.RESET_ALL}")
-                    else:
-                        print(f"{Fore.YELLOW}{output_gpio_obj.pin}: {Fore.RED}{gpio_state}{Style.RESET_ALL}")
-        
-        except Exception:
-            return False
+                    print(f"{Fore.YELLOW}-------------------------------------------------{Style.RESET_ALL}")
+                    print(f"{Fore.GREEN}[INFO]: RF path {rf_output} activated!{Style.RESET_ALL}")
+                    print(f"{Fore.YELLOW}-------------------------------------------------{Style.RESET_ALL}")
+                    print(f"{Fore.GREEN}[INFO]: START OF CNANGING GPIO STATE{Style.RESET_ALL}")
+                
+                for output_gpio_obj, gpio_state in zip(self.switch_control, self.switch_truth_table[rf_output]):
+                    output_gpio_obj.value = gpio_state
+                    
+                    if "--show-debug-info" in sys.argv:
+                        if gpio_state:
+                            print(f"{Fore.YELLOW}{output_gpio_obj.pin}: {Fore.GREEN}{gpio_state}{Style.RESET_ALL}")
+                        else:
+                            print(f"{Fore.YELLOW}{output_gpio_obj.pin}: {Fore.RED}{gpio_state}{Style.RESET_ALL}")
+            
+            except Exception:
+                return False
+            
+            if "--show-debug-info" in sys.argv:
+                print(f"{Fore.GREEN}[INFO]: END OF CHANGING GPIO STATE{Style.RESET_ALL}")
+                print(f"{Fore.YELLOW}-------------------------------------------------{Style.RESET_ALL}\n")
+            
+            return True
         
         if "--show-debug-info" in sys.argv:
-            print(f"{Fore.GREEN}[INFO]: END OF CHANGING GPIO STATE{Style.RESET_ALL}")
-            print(f"{Fore.YELLOW}-------------------------------------------------{Style.RESET_ALL}\n")
-        
+            print(f"{Fore.RED}[INFO]: Trying to activate already active RF path {rf_output}!{Style.RESET_ALL}")
+
         return True
 
 class RFSwitchContainer(RFSwitch):
