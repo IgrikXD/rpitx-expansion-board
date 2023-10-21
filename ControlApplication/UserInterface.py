@@ -30,7 +30,7 @@ class UserInterface:
     def chooseBoard(self):
         selected_board = self.whiptail_interface.menu("Choose your board:", self.devices_list)
         # <Cancel> button has been pressed
-        if(selected_board[BUTTONS_STATE] == CANCEL_BUTTON):
+        if (selected_board[BUTTONS_STATE] == CANCEL_BUTTON):
             self.whiptail_interface.msgbox(FAREWELL_MESSAGE)
             exit(0)
         return selected_board[USER_CHOICE]
@@ -130,7 +130,8 @@ class UserInterface:
         for i in range(device.DEVICE_TYPE_MAPPING[selected_board][0]):
             
             unique_case_styles = sorted(set(filter.case_style for filter in filter_objects))
-            filter_case = self.whiptail_interface.menu(f"Choose case for filter {i + 1} from {device.DEVICE_TYPE_MAPPING[selected_board][0]}:", unique_case_styles)
+            filter_case = self.whiptail_interface.menu(f"Choose case for filter {i + 1} from 
+                                                       {device.DEVICE_TYPE_MAPPING[selected_board][0]}:", unique_case_styles)
 
             # <Cancel> button has been pressed
             if(filter_case[BUTTONS_STATE] == CANCEL_BUTTON):
