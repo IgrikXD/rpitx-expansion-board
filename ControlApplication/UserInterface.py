@@ -69,6 +69,9 @@ class UserInterface:
                 return device
             
             except FileNotFoundError:
+                if ("--show-debug-info" in sys.argv) and (self.log_filename != None):
+                    with open(self.log_filename, "a") as file:
+                        file.write(f"[ERROR]: Configuration file {configuration_path[USER_CHOICE]} not found!\n")
                 # You will be prompted to enter the new file path
                 self.displayInfo("Configuration file not found!")
 

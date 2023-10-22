@@ -81,6 +81,12 @@ class RFSwitch():
                                 file.write(f"{output_gpio_obj.pin}: {gpio_state}\n")
             
             except Exception:
+                if ("--show-debug-info" in sys.argv) and (self.log_filename != None):
+                    with open(self.log_filename, "a") as file:
+                        file.write(f"[ERROR]: Unable to set state {gpio_state} for {output_gpio_obj.pin}!")
+                        file.write(f"[INFO]: END OF CHANGING GPIO STATE\n")
+                        file.write(f"-------------------------------------------------\n\n")
+                
                 return False
             
             if ("--show-debug-info" in sys.argv) and (self.log_filename != None):
