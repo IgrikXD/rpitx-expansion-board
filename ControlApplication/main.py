@@ -1,4 +1,4 @@
-import datetime
+
 from Device import *
 from RFSwitch import *
 from UserInterface import *
@@ -14,17 +14,11 @@ AMPLIFIER_DUMP_FILE = "AmplifierDump.pkl"
 
 LOG_FILENAME = "./ControlApplication/DebugInfo.log"
 
-def appRunningTimestamp(log_filename):
-    if ("--show-debug-info" in sys.argv) and (log_filename != None):
-        with open(log_filename, "a") as file:
-            file.write(f"[INFO]: Application running at: {datetime.datetime.now()}!\n")
-
 def main():
 
-    appRunningTimestamp(LOG_FILENAME)
+    user_interface = UserInterface(Device.DEVICES_LIST, UserInterface.CONFIGURATION_ACTIONS, LOG_FILENAME)
     filters_list = ComponentsList(ComponentsList.FILTER, FILTER_MODELS_DIR, FILTER_DUMP_FILE, LOG_FILENAME)
     amplifiers_list = ComponentsList(ComponentsList.AMPLIFIER, AMPLIFIER_MODELS_DIR, AMPLIFIER_DUMP_FILE, LOG_FILENAME)
-    user_interface = UserInterface(Device.DEVICES_LIST, UserInterface.CONFIGURATION_ACTIONS, LOG_FILENAME)
 
     while True:
         board = user_interface.chooseBoard()
