@@ -5,7 +5,7 @@ Expansion board for Raspberry PI 4B allowing to use coaxial SMA output and switc
 The PCB is installed by attaching to the GPIO of the Raspberry PI and can be additionally fixed by using the holes on the Raspberry PI and expansion board side.
 
 ## Current development progress:
-[![Progress](https://img.shields.io/badge/rpitx--coax--pcb-not%20tested-red.svg?longCache=true&style=for-the-badge)](https://easyeda.com/IgrikXD/rpitx-expansion-board)&nbsp;[![Progress](https://img.shields.io/badge/version-1.0-blue.svg?longCache=true&style=for-the-badge)](./EasyEDA)
+[![Progress](https://img.shields.io/badge/rpitx--expansion--board-not%20tested-red.svg?longCache=true&style=for-the-badge)](https://easyeda.com/IgrikXD/rpitx-expansion-board)&nbsp;[![Progress](https://img.shields.io/badge/app%20version-0.1-blue.svg?longCache=true&style=for-the-badge)](./ControlApplication)&nbsp;[![Progress](https://img.shields.io/badge/pcb%20version-0.0-blue.svg?longCache=true&style=for-the-badge)](./EasyEDA)
 
 ## Implementations at EasyEDA platform:
 - [rpitx-expansion-board][1] ([Components list](./Components-list.md), [Usage guide](./Usage-guide.md))
