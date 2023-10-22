@@ -60,11 +60,11 @@ def main():
             device = user_interface.loadDeviceConfiguration(board)
             if device == None:
                 continue
-        
+
         device.initFilterRFSwitches(FilterSwitch.FILTER_INPUT_SWITCH_GPIO_PINS, 
                                     FilterSwitch.FILTER_OUTPUT_SWITCH_GPIO_PINS, 
                                     Device.DEVICE_TYPE_MAPPING[board][FILTERS_SWITCH_TRUTH_TABLE])
-        
+
         # The LNA will only be initialized if the DEVICE_TYPE_MAPPING structure 
         # contains switch information to control the LNA
         device.initLNA(LNASwitch.LNA_INPUT_SWITCH_GPIO_PINS, 
