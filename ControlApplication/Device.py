@@ -24,20 +24,21 @@ class Device:
         DEVICES_LIST[5]: (6, RFSwitch.SP6T_SWITCH_TRUTH_TABLE, RFSwitch.SPDT_SWITCH_TRUTH_TABLE)
     }
 
-    def __init__(self, model_name):
+    def __init__(self, model_name, log_filename = None):
         self.model_name = model_name
         self.filters = []
         self.filter_switch = None
         self.lna = []
         self.lna_switch = None
+        self.log_filename = log_filename
 
     def initFilterRFSwitches(self, input_switch_pinout, output_switch_pinout, switch_truth_table):
         if self.filter_switch is None:
-            self.filter_switch = FilterSwitch(input_switch_pinout, output_switch_pinout, switch_truth_table)
+            self.filter_switch = FilterSwitch(input_switch_pinout, output_switch_pinout, switch_truth_table, self.log_filename)
 
     def initLNA(self, input_switch_pinout, output_switch_pinout, switch_truth_table):
         if switch_truth_table and self.lna_switch is None:
-            self.lna_switch = LNASwitch(input_switch_pinout, output_switch_pinout, switch_truth_table)
+            self.lna_switch = LNASwitch(input_switch_pinout, output_switch_pinout, switch_truth_table, self.log_filename)
 
     
     def getConfigurationInfo(self):

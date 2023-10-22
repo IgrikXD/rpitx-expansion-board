@@ -22,10 +22,11 @@ class UserInterface:
         "Load device configuration"
     ]
 
-    def __init__(self, devices_list, configuration_actions):
+    def __init__(self, devices_list, configuration_actions, log_filename = None):
         self.whiptail_interface = Whiptail(title=APPLICATION_TITLE)
         self.devices_list = devices_list
         self.configuration_actions = configuration_actions
+        self.log_filename = log_filename
 
     def chooseAction(self):
         return self.whiptail_interface.menu("Choose an action:", self.configuration_actions)
@@ -55,8 +56,9 @@ class UserInterface:
                 with open(configuration_path[USER_CHOICE], 'rb') as device_configuration_file:
                     device = pickle.load(device_configuration_file)
 
-                if "--show-debug-info" in sys.argv:
-                    print(f"{Fore.YELLOW}[INFO]: Device configuration loaded: {configuration_path[USER_CHOICE]}{Style.RESET_ALL}")
+                if ("--show-debug-info" in sys.argv) and (self.log_filename != None):
+                    with open(self.log_filename, "a") as file:
+                        file.write(f"[INFO]: Device configuration loaded: {configuration_path[USER_CHOICE]}\n")
 
                 self.displayInfo("Configuration loaded succesfully!")
                 return device
@@ -73,8 +75,9 @@ class UserInterface:
         with open(file_path, 'wb') as device_configuration_file:
             pickle.dump(device, device_configuration_file)
         
-        if "--show-debug-info" in sys.argv:
-            print(f"{Fore.YELLOW}[INFO]: Device configuration info saved: {file_path}{Style.RESET_ALL}")
+        if ("--show-debug-info" in sys.argv) and (self.log_filename != None):
+            with open(self.log_filename, "a") as file:
+                file.write(f"[INFO]: Device configuration info saved: {file_path}\n")
         
         self.displayInfo(f"Configuration saved!\nFile: {file_path}")
 
@@ -154,7 +157,7 @@ class UserInterface:
                 return component
 
     def createConfiguration(self, selected_board, filter_objects, amplifier_objects):
-        device = Device(selected_board)
+        device = Device(selected_board, self.log_filename)
 
         for i in range(device.DEVICE_TYPE_MAPPING[selected_board][0]):
             selected_filter = self.selectComponent(filter_objects, f"Choose filter case for filter {i + 1} from {device.DEVICE_TYPE_MAPPING[selected_board][0]}:")

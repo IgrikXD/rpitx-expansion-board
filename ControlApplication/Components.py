@@ -1,4 +1,3 @@
-from colorama import Fore, Style
 import os
 import pandas
 import pickle
@@ -31,9 +30,10 @@ class ComponentsList:
     FILTER = "Filter"
     AMPLIFIER = "Amplifier"
 
-    def __init__(self, model_type, models_dir, dump_filename):
+    def __init__(self, model_type, models_dir, dump_filename, log_filename = None):
         self.model_type = model_type
         self.dump_file_path = os.path.join(models_dir, dump_filename)
+        self.log_filename = log_filename
         
         if os.path.exists(self.dump_file_path):
             self.data = self.loadDump(self.dump_file_path)
@@ -77,12 +77,14 @@ class ComponentsList:
 
     def loadDump(self, dump_file_path):
         with open(dump_file_path, 'rb') as model_list_dump_file:
-            if "--show-debug-info" in sys.argv:
-                print(f"{Fore.YELLOW}[INFO]: Dump loaded: {dump_file_path}{Style.RESET_ALL}")
+            if ("--show-debug-info" in sys.argv) and (self.log_filename != None):
+                with open(self.log_filename, "a") as file:
+                    file.write(f"[INFO]: Dump loaded: {dump_file_path}\n")
             return pickle.load(model_list_dump_file)
 
     def saveDump(self, dump_file_path):
         with open(dump_file_path, 'wb') as model_list_dump_file:
             pickle.dump(self.data, model_list_dump_file)
-        if "--show-debug-info" in sys.argv:
-            print(f"{Fore.YELLOW}[INFO]: Dump saved: {dump_file_path}{Style.RESET_ALL}")
+        if ("--show-debug-info" in sys.argv) and (self.log_filename != None):
+            with open(self.log_filename, "a") as file:
+                    file.write(f"[INFO]: Dump saved: {dump_file_path}\n")
