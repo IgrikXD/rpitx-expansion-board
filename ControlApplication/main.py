@@ -24,7 +24,7 @@ def showHelpInfo(app_version, log_filename):
         f"{Fore.GREEN}--use-mock-gpio{Style.RESET_ALL}         Using MockFactory to simulate real GPIO ports.This allows the application " 
         f"to run on devices other than RaspberryPi without causing a GPIO initialization error. Used for "
         f"debugging and testing GPIO port states.\n"
-        f"{Fore.GREEN}--show-debug-info{Style.RESET_ALL}       Output debugging information to a file: {log_filename}\n"
+        f"{Fore.GREEN}--show-debug-info{Style.RESET_ALL}       Output debugging information to a file: {log_filename}"
     )
     print(help_info)
 
