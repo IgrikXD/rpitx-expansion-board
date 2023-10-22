@@ -1,4 +1,5 @@
 
+from colorama import Fore, Style
 from Device import *
 from RFSwitch import *
 from UserInterface import *
@@ -14,7 +15,25 @@ AMPLIFIER_DUMP_FILE = "AmplifierDump.pkl"
 
 LOG_FILENAME = "./ControlApplication/DebugInfo.log"
 
+APP_VERISON = 0.1
+
+def showHelpInfo(app_version, log_filename):
+    help_info = (
+        f"rpitx-control {app_version} - 2023 Ihar Yatsevich\n"
+        f"{Fore.YELLOW}Avaliable application arguments:{Style.RESET_ALL}\n"
+        f"{Fore.GREEN}--use-mock-gpio{Style.RESET_ALL}         Using MockFactory to simulate real GPIO ports.This allows the application " 
+        f"to run on devices other than RaspberryPi without causing a GPIO initialization error. Used for "
+        f"debugging and testing GPIO port states.\n"
+        f"{Fore.GREEN}--show-debug-info{Style.RESET_ALL}       Output debugging information to a file: {log_filename}\n"
+    )
+    print(help_info)
+
 def main():
+
+    # The program was launched with the --help argument. We display the help information and finish the work.
+    if ("--help" in sys.argv):
+        showHelpInfo(APP_VERISON, LOG_FILENAME)
+        exit(0)
 
     user_interface = UserInterface(Device.DEVICES_LIST, UserInterface.CONFIGURATION_ACTIONS, LOG_FILENAME)
     filters_list = ComponentsList(ComponentsList.FILTER, FILTER_MODELS_DIR, FILTER_DUMP_FILE, LOG_FILENAME)

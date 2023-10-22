@@ -29,7 +29,7 @@ class UserInterface:
         self.configuration_actions = configuration_actions
         self.log_filename = log_filename
         if ("--show-debug-info" in sys.argv) and (log_filename != None):
-            self.whiptail_interface.msgbox(f"Debug mode enabled!\nLogs will be writed to: {log_filename}")
+            self.displayInfo(f"Debug mode enabled!\nLogs will be writed to: {log_filename}")
             with open(log_filename, "a") as file:
                 file.write(f"[INFO]: Application running at: {datetime.datetime.now()}!\n")
 
