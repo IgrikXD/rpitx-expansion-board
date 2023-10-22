@@ -28,6 +28,7 @@ class UserInterface:
         self.devices_list = devices_list
         self.configuration_actions = configuration_actions
         self.log_filename = log_filename
+        
         if ("--show-debug-info" in sys.argv) and (log_filename != None):
             self.displayInfo(f"Debug mode enabled!\nLogs will be writed to: {log_filename}")
             with open(log_filename, "a") as file:
@@ -44,7 +45,12 @@ class UserInterface:
         # <Cancel> button has been pressed
         if (selected_board[BUTTONS_STATE] == CANCEL_BUTTON):
             self.displayInfo(FAREWELL_MESSAGE)
+            
+            if ("--show-debug-info" in sys.argv) and (self.log_filename != None):
+                with open(self.log_filename, "a") as file:
+                    file.write(f"[INFO]: Application stopped at: {datetime.datetime.now()}!\n")
             exit(0)
+
         return selected_board[USER_CHOICE]
 
     def loadDeviceConfiguration(self, selected_board):
@@ -123,6 +129,9 @@ class UserInterface:
             if (action_choice[BUTTONS_STATE] == CANCEL_BUTTON):
                 # <Cancel> button has been pressed
                 self.displayInfo(FAREWELL_MESSAGE)
+                if ("--show-debug-info" in sys.argv) and (self.log_filename != None):
+                    with open(self.log_filename, "a") as file:
+                        file.write(f"[INFO]: Application stopped at: {datetime.datetime.now()}!\n")
                 exit(0)
             else:
                 user_choice = action_choice[USER_CHOICE]
