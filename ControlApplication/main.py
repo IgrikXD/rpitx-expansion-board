@@ -15,7 +15,19 @@ AMPLIFIER_DUMP_FILE = "AmplifierDump.pkl"
 
 LOG_FILENAME = "./ControlApplication/DebugInfo.log"
 
-APP_VERISON = 0.1
+APP_VERISON = 0.2
+# -----------------------------------------------------------
+# Changelog:
+# -----------------------------------------------------------
+# Version 0.2: When the activateRFPath() function is called, 
+# the activateRFOutput() function is called on a separate 
+# thread for each of the RFSwitch objects. This eliminates 
+# the problem of sequential switching of GPIO states for each 
+# of the RFSwitch objects - first the input switch was switched, 
+# then the output switch. Now, we switch the states of two 
+# switches simultaneously.
+# -----------------------------------------------------------
+
 
 def showHelpInfo(app_version, log_filename):
     help_info = (

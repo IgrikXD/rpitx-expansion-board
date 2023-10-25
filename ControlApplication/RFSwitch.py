@@ -1,9 +1,8 @@
+from concurrent.futures import ThreadPoolExecutor
 from gpiozero.pins.mock import MockFactory
 from gpiozero import OutputDevice
 from gpiozero import BadPinFactory
 import sys
-from threading import Thread
-from concurrent.futures import ThreadPoolExecutor
 
 # Aliases for high and low logic levels
 HIGH = True
@@ -121,26 +120,24 @@ class RFSwitchWrapper(RFSwitch):
     def __init__(self, input_switch_pinout, output_switch_pinout, switch_truth_table, log_filename = None):
         self.input_switch = RFSwitch(input_switch_pinout, switch_truth_table, log_filename)
         self.output_switch = RFSwitch(output_switch_pinout, switch_truth_table, log_filename)
-
-    def activateRFPath(self, rf_path_index):
-        return (self.input_switch.activateRFOutput(rf_path_index) and self.output_switch.activateRFOutput(rf_path_index))
+        self.log_filename = log_filename
     
     def activateRFPath(self, rf_path_index):
         # We activate two switches at the same time because we need to create a 
         # path for the signal to pass through a particular filter. This is 
         # achieved by sending the output signal to the input switch, passing 
         # it through a filter and then exiting through the output switch
-        def activate_switch(switch, path_index):
-            return switch.activateRFOutput(path_index)
-
+        if ("--show-debug-info" in sys.argv) and (self.log_filename != None):
+            with open(self.log_filename, "a") as file:
+                file.write(f"[INFO]: RFSwitchWrapper.activateRFPath() function called!\n")
+                file.write(f"[INFO]: Changing the state of the GPIO ports for each of the "
+                           "RFSwitch is performed in a separate thread!\n")
+    
         with ThreadPoolExecutor(max_workers=2) as executor:
-            input_switch_result = executor.submit(activate_switch, self.input_switch, rf_path_index)
-            output_switch_result = executor.submit(activate_switch, self.output_switch, rf_path_index)
+            input_switch_state_change_thread = executor.submit(self.input_switch.activateRFOutput, rf_path_index)
+            output_switch_state_change_thread = executor.submit(self.output_switch.activateRFOutput, rf_path_index)
 
-        input_switch_result = input_switch_result.result()
-        output_switch_result = output_switch_result.result()
-
-        return input_switch_result and output_switch_result
+        return (input_switch_state_change_thread.result() and output_switch_state_change_thread.result())
 
 class FilterSwitch(RFSwitchWrapper):
 
@@ -148,7 +145,7 @@ class FilterSwitch(RFSwitchWrapper):
     FILTER_OUTPUT_SWITCH_GPIO_PINS = [0, 5, 6]
 
     def enableFilter(self, filter_index):
-            return self.activateRFPath(filter_index) 
+        return self.activateRFPath(filter_index) 
     
 class LNASwitch(RFSwitchWrapper):
 

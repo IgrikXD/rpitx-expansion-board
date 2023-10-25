@@ -32,7 +32,9 @@ class UserInterface:
         if ("--show-debug-info" in sys.argv) and (log_filename != None):
             self.displayInfo(f"Debug mode enabled!\nLogs will be writed to: {log_filename}")
             with open(log_filename, "a") as file:
+                file.write(f"-------------------------------------------------\n")
                 file.write(f"[INFO]: Application running at: {datetime.datetime.now()}!\n")
+                file.write(f"-------------------------------------------------\n")
 
     def chooseAction(self):
         return self.whiptail_interface.menu("Choose an action:", self.configuration_actions)
@@ -48,7 +50,9 @@ class UserInterface:
             
             if ("--show-debug-info" in sys.argv) and (self.log_filename != None):
                 with open(self.log_filename, "a") as file:
+                    file.write(f"-------------------------------------------------\n")
                     file.write(f"[INFO]: Application stopped at: {datetime.datetime.now()}!\n")
+                    file.write(f"-------------------------------------------------\n")
             exit(0)
 
         return selected_board[USER_CHOICE]
@@ -131,7 +135,9 @@ class UserInterface:
                 self.displayInfo(FAREWELL_MESSAGE)
                 if ("--show-debug-info" in sys.argv) and (self.log_filename != None):
                     with open(self.log_filename, "a") as file:
+                        file.write(f"-------------------------------------------------\n")
                         file.write(f"[INFO]: Application stopped at: {datetime.datetime.now()}!\n")
+                        file.write(f"-------------------------------------------------\n")
                 exit(0)
             else:
                 user_choice = action_choice[USER_CHOICE]
