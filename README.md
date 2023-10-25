@@ -1,13 +1,16 @@
 # rpitx-expansion-board
 
-Expansion board for Raspberry PI 4B allowing to use coaxial SMA output and switchable filters instead of direct wire connection of radio equipment (antennas, amplifiers, switches, etc.) to GPIO during working with the [rpitx][2] package.
+Expansion board for **Raspberry Pi 4 Model B** allowing to use coaxial SMA output and switchable filters instead of direct wire connection of radio equipment (antennas, amplifiers, switches, etc.) to GPIO during working with the [rpitx][2] or [rpitx-ui][3] package.
 
-The PCB is installed by attaching to the GPIO of the Raspberry PI and can be additionally fixed by using the holes on the Raspberry PI and expansion board side.
+The PCB is installed by attaching to the GPIO of the Raspberry Pi and can be additionally fixed by using the holes on the Raspberry Pi and expansion board side.
 
 ## Current development progress:
 [![Progress](https://img.shields.io/badge/rpitx--expansion--board-not%20tested-red.svg?longCache=true&style=for-the-badge)](https://easyeda.com/IgrikXD/rpitx-expansion-board)&nbsp;[![Progress](https://img.shields.io/badge/app%20version-0.1-blue.svg?longCache=true&style=for-the-badge)](./ControlApplication)&nbsp;[![Progress](https://img.shields.io/badge/pcb%20version-0.0-blue.svg?longCache=true&style=for-the-badge)](./EasyEDA)
 
-## Implementations at EasyEDA platform:
+## Application usage:
+The **_rpitx-control_** application is used to control the expansion board.
+
+## PCB implementations at EasyEDA platform:
 - [rpitx-expansion-board][1] ([Components list](./Components-list.md), [Usage guide](./Usage-guide.md))
 
 ## How to use this repository?
@@ -15,12 +18,12 @@ In [Datasheets](./Datasheets) and [Schematics](./Schematics) directories, you ca
 
 ## Basic device characteristics:
 **PCB versions:**
-* **rpitx-expansion-board-SP3T** - <DESCRIPTION>
-* **rpitx-expansion-board-SP4T** - <DESCRIPTION>
-* **rpitx-expansion-board-SP6T** - <DESCRIPTION>
-* **rpitx-expansion-board-SP3T-LNA** - <DESCRIPTION>
-* **rpitx-expansion-board-SP4T-LNA** - <DESCRIPTION>
-* **rpitx-expansion-board-SP6T-LNA** - <DESCRIPTION>
+* **rpitx-expansion-board-SP3T** - PCB with 3 switchable filters.  
+* **rpitx-expansion-board-SP4T** - PCB with 4 switchable filters.  
+* **rpitx-expansion-board-SP6T** - PCB with 6 switchable filters.  
+* **rpitx-expansion-board-SP3T-LNA** - PCB with 3 switchable filters and LNA.  
+* **rpitx-expansion-board-SP4T-LNA** - PCB with 4 switchable filters and LNA.  
+* **rpitx-expansion-board-SP6T-LNA** - PCB with 6 switchable filters and LNA.  
 
 **RF connector:** SMA  
 **Feed line:** 50 Ohm coaxial cable  
@@ -30,9 +33,10 @@ In [Datasheets](./Datasheets) and [Schematics](./Schematics) directories, you ca
 
 ## Resources:
 [rpitx project page at GitHub][2]  
-[Buy filters][3]  
-[Buy amplifiers][4]  
-[Buy RF switches][5]  
+[rpitx-ui project page at GitHub][3]  
+[Buy filters][4]  
+[Buy amplifiers][5]  
+[Buy RF switches][6]  
 
 ## How to contact me?
 - E-mail: igor.nikolaevich.96@gmail.com
@@ -41,6 +45,7 @@ In [Datasheets](./Datasheets) and [Schematics](./Schematics) directories, you ca
 
   [1]: https://easyeda.com/IgrikXD/rpitx-expansion-board
   [2]: https://github.com/F5OEO/rpitx
-  [3]: https://www.minicircuits.com/WebStore/RF-Filters.html
-  [4]: https://www.minicircuits.com/WebStore/Amplifiers.html
-  [5]: https://www.minicircuits.com/WebStore/Switches.html
+  [3]: https://github.com/IgrikXD/rpitx-ui
+  [4]: https://www.minicircuits.com/WebStore/RF-Filters.html
+  [5]: https://www.minicircuits.com/WebStore/Amplifiers.html
+  [6]: https://www.minicircuits.com/WebStore/Switches.html
