@@ -9,6 +9,13 @@ The PCB is installed by attaching to the GPIO of the Raspberry Pi and can be add
 
 ## Application usage:
 The **_rpitx-control_** application is used to control the expansion board.
+```sh
+sudo apt update
+git clone https://github.com/IgrikXD/rpitx-expansion-board
+pip3 install gpiozero pickle pandas
+cd rpitx-expansion-board
+python3 ./ControlApplication/main.py
+```
 
 ## PCB implementations at EasyEDA platform:
 - [rpitx-expansion-board][1] ([Components list](./Components-list.md), [Usage guide](./Usage-guide.md))
