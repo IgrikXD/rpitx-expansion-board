@@ -2,6 +2,7 @@ from gpiozero.pins.mock import MockFactory
 from gpiozero import OutputDevice
 from gpiozero import BadPinFactory
 import sys
+from threading import Thread
 
 # Aliases for high and low logic levels
 HIGH = True
@@ -121,11 +122,38 @@ class RFSwitchWrapper(RFSwitch):
         self.output_switch = RFSwitch(output_switch_pinout, switch_truth_table, log_filename)
 
     def activateRFPath(self, rf_path_index):
+        return (self.input_switch.activateRFOutput(rf_path_index) and self.output_switch.activateRFOutput(rf_path_index))
+    
+    def activateRFPath(self, rf_path_index):
         # We activate two switches at the same time because we need to create a 
         # path for the signal to pass through a particular filter. This is 
         # achieved by sending the output signal to the input switch, passing 
         # it through a filter and then exiting through the output switch
-        return (self.input_switch.activateRFOutput(rf_path_index) and self.output_switch.activateRFOutput(rf_path_index))
+        input_switch_result = None
+        output_switch_result = None
+
+        # Функция, которая будет запускаться в потоках для активации путей
+        def activate_switch(switch, path_index):
+            nonlocal input_switch_result, output_switch_result
+            if switch == "input":
+                input_switch_result = self.input_switch.activateRFOutput(path_index)
+            elif switch == "output":
+                output_switch_result = self.output_switch.activateRFOutput(path_index)
+
+        # Создаем потоки для активации входного и выходного переключателей
+        input_switch_thread = Thread(target=activate_switch, args=("input", rf_path_index))
+        output_switch_thread = Thread(target=activate_switch, args=("output", rf_path_index))
+
+        # Запускаем потоки
+        input_switch_thread.start()
+        output_switch_thread.start()
+
+        # Ожидаем завершения потоков
+        input_switch_thread.join()
+        output_switch_thread.join()
+
+        # Возвращаем результаты
+        return (input_switch_result and output_switch_result)
 
 class FilterSwitch(RFSwitchWrapper):
 
