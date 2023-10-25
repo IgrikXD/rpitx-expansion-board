@@ -5,7 +5,7 @@ Expansion board for **Raspberry Pi 4 Model B** allowing to use coaxial SMA outpu
 The PCB is installed by attaching to the GPIO of the Raspberry Pi and can be additionally fixed by using the holes on the Raspberry Pi and expansion board side.
 
 ## Current development progress:
-[![Progress](https://img.shields.io/badge/rpitx--expansion--board-not%20tested-red.svg?longCache=true&style=for-the-badge)](https://easyeda.com/IgrikXD/rpitx-expansion-board)&nbsp;[![Progress](https://img.shields.io/badge/app%20version-0.1-blue.svg?longCache=true&style=for-the-badge)](./ControlApplication)&nbsp;[![Progress](https://img.shields.io/badge/pcb%20version-0.0-blue.svg?longCache=true&style=for-the-badge)](./EasyEDA)
+[![Progress](https://img.shields.io/badge/rpitx--expansion--board-not%20tested-red.svg?longCache=true&style=for-the-badge)](https://easyeda.com/IgrikXD/rpitx-expansion-board)&nbsp;[![Progress](https://img.shields.io/badge/app%20version-0.2-blue.svg?longCache=true&style=for-the-badge)](./ControlApplication)&nbsp;[![Progress](https://img.shields.io/badge/pcb%20version-0.0-blue.svg?longCache=true&style=for-the-badge)](./EasyEDA)
 
 ## Application usage:
 The **_rpitx-control_** application is used to control the expansion board.
@@ -34,9 +34,7 @@ In [Datasheets](./Datasheets) and [Schematics](./Schematics) directories, you ca
 ## Resources:
 [rpitx project page at GitHub][2]  
 [rpitx-ui project page at GitHub][3]  
-[Buy filters][4]  
-[Buy amplifiers][5]  
-[Buy RF switches][6]  
+[Buy filters][4] / [amplifiers][5] / [RF switches][6]  
 
 ## How to contact me?
 - E-mail: igor.nikolaevich.96@gmail.com
