@@ -36,6 +36,8 @@ APP_VERISON = 0.2
 # is now processed in a separate thread.
 # Added highlighting of application start and stop timestamp 
 # using '-' signs.
+# whiptail_interface.msgbox() is now called with an additional 
+# --scrolltext parameter
 # -----------------------------------------------------------
 
 
