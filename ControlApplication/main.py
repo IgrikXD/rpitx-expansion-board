@@ -34,6 +34,8 @@ APP_VERISON = 0.2
 # amplifiers in parallel rather than sequentially.
 # When creating a ComponentsList object, each of the .csv files 
 # is now processed in a separate thread.
+# Added highlighting of application start and stop timestamp 
+# using '-' signs.
 # -----------------------------------------------------------
 
 
@@ -57,6 +59,7 @@ def main():
 
     user_interface = UserInterface(Device.DEVICES_LIST, UserInterface.CONFIGURATION_ACTIONS, LOG_FILENAME)
 
+    # Initializing available filter and amplifier models
     with ThreadPoolExecutor(max_workers=2) as executor:
         filters_future = executor.submit(ComponentsList, ComponentsList.FILTER, FILTER_MODELS_DIR, FILTER_DUMP_FILE, LOG_FILENAME)
         amplifiers_future = executor.submit(ComponentsList, ComponentsList.AMPLIFIER, AMPLIFIER_MODELS_DIR, AMPLIFIER_DUMP_FILE, LOG_FILENAME)
