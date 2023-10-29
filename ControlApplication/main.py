@@ -1,5 +1,6 @@
 
 from colorama import Fore, Style
+from concurrent.futures import ThreadPoolExecutor
 from Device import *
 from RFSwitch import *
 from UserInterface import *
@@ -15,7 +16,30 @@ AMPLIFIER_DUMP_FILE = "AmplifierDump.pkl"
 
 LOG_FILENAME = "./ControlApplication/DebugInfo.log"
 
-APP_VERISON = 0.1
+APP_VERISON = 0.2
+# -----------------------------------------------------------
+# Changelog:
+# -----------------------------------------------------------
+# Version 0.2: 
+# -----------------------------------------------------------
+# When the activateRFPath() function is called, 
+# the activateRFOutput() function is called on a separate 
+# thread for each of the RFSwitch objects. This eliminates 
+# the problem of sequential switching of GPIO states for each 
+# of the RFSwitch objects - first the input switch was switched, 
+# then the output switch. Now, we switch the states of two 
+# switches simultaneously.
+# The ComponentsList constructors are now called in separate 
+# threads, which allows reading data about filters and 
+# amplifiers in parallel rather than sequentially.
+# When creating a ComponentsList object, each of the .csv files 
+# is now processed in a separate thread.
+# Added highlighting of application start and stop timestamp 
+# using '-' signs.
+# whiptail_interface.msgbox() is now called with an additional 
+# --scrolltext parameter
+# -----------------------------------------------------------
+
 
 def showHelpInfo(app_version, log_filename):
     help_info = (
@@ -36,8 +60,14 @@ def main():
         exit(0)
 
     user_interface = UserInterface(Device.DEVICES_LIST, UserInterface.CONFIGURATION_ACTIONS, LOG_FILENAME)
-    filters_list = ComponentsList(ComponentsList.FILTER, FILTER_MODELS_DIR, FILTER_DUMP_FILE, LOG_FILENAME)
-    amplifiers_list = ComponentsList(ComponentsList.AMPLIFIER, AMPLIFIER_MODELS_DIR, AMPLIFIER_DUMP_FILE, LOG_FILENAME)
+
+    # Initializing available filter and amplifier models
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        filters_future = executor.submit(ComponentsList, ComponentsList.FILTER, FILTER_MODELS_DIR, FILTER_DUMP_FILE, LOG_FILENAME)
+        amplifiers_future = executor.submit(ComponentsList, ComponentsList.AMPLIFIER, AMPLIFIER_MODELS_DIR, AMPLIFIER_DUMP_FILE, LOG_FILENAME)
+
+        filters_list = filters_future.result()
+        amplifiers_list = amplifiers_future.result()
 
     while True:
         board = user_interface.chooseBoard()
