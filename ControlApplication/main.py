@@ -5,7 +5,6 @@ from Device import *
 from RFSwitch import *
 from UserInterface import *
 from Components import *
-import threading
 
 FILTERS_SWITCH_TRUTH_TABLE = 1
 LNA_SWITCH_TRUTH_TABLE = 2
