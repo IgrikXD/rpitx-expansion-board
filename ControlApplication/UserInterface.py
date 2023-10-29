@@ -40,7 +40,7 @@ class UserInterface:
         return self.whiptail_interface.menu("Choose an action:", self.configuration_actions)
 
     def displayInfo(self, info):
-        self.whiptail_interface.msgbox(info)
+        self.whiptail_interface.msgbox(info, extra_args=["--scrolltext"])
 
     def chooseBoard(self):
         selected_board = self.whiptail_interface.menu("Choose your board:", self.devices_list)
