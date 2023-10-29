@@ -1,9 +1,11 @@
 
 from colorama import Fore, Style
+from concurrent.futures import ThreadPoolExecutor
 from Device import *
 from RFSwitch import *
 from UserInterface import *
 from Components import *
+import threading
 
 FILTERS_SWITCH_TRUTH_TABLE = 1
 LNA_SWITCH_TRUTH_TABLE = 2
@@ -48,8 +50,42 @@ def main():
         exit(0)
 
     user_interface = UserInterface(Device.DEVICES_LIST, UserInterface.CONFIGURATION_ACTIONS, LOG_FILENAME)
-    filters_list = ComponentsList(ComponentsList.FILTER, FILTER_MODELS_DIR, FILTER_DUMP_FILE, LOG_FILENAME)
-    amplifiers_list = ComponentsList(ComponentsList.AMPLIFIER, AMPLIFIER_MODELS_DIR, AMPLIFIER_DUMP_FILE, LOG_FILENAME)
+    # filters_list = ComponentsList(ComponentsList.FILTER, FILTER_MODELS_DIR, FILTER_DUMP_FILE, LOG_FILENAME)
+    # amplifiers_list = ComponentsList(ComponentsList.AMPLIFIER, AMPLIFIER_MODELS_DIR, AMPLIFIER_DUMP_FILE, LOG_FILENAME)
+
+    filters_list = None
+    amplifiers_list = None
+
+    def perform_filters_action(filters_event):
+        nonlocal filters_list 
+        filters_list = ComponentsList(ComponentsList.FILTER, FILTER_MODELS_DIR, FILTER_DUMP_FILE, LOG_FILENAME)
+        # Здесь добавьте код для выполнения действий с filters_list
+        # Сигнализируем, что задача завершена
+        filters_event.set()
+
+    def perform_amplifiers_action(amplifiers_event):
+        nonlocal amplifiers_list 
+        amplifiers_list = ComponentsList(ComponentsList.AMPLIFIER, AMPLIFIER_MODELS_DIR, AMPLIFIER_DUMP_FILE, LOG_FILENAME)
+        # Здесь добавьте код для выполнения действий с amplifiers_list
+        # Сигнализируем, что задача завершена
+        amplifiers_event.set()
+
+    # Создаем события для сигнализации
+    filters_event = threading.Event()
+    amplifiers_event = threading.Event()
+
+    # Создаем два потока
+    filters_thread = threading.Thread(target=perform_filters_action, args=(filters_event,))
+    amplifiers_thread = threading.Thread(target=perform_amplifiers_action, args=(amplifiers_event,))
+
+    # Запускаем потоки
+    filters_thread.start()
+    amplifiers_thread.start()
+
+    # Дожидаемся завершения задач в потоках
+    filters_event.wait()
+    amplifiers_event.wait()
+
 
     while True:
         board = user_interface.chooseBoard()
