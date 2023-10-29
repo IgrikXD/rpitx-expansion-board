@@ -46,7 +46,7 @@ class ComponentsList:
         models = []
         file_list = [filename for filename in os.listdir(models_dir) if filename.endswith('.csv')]
 
-        def process_csv_file(csv_file_path):
+        def processCsvFile(csv_file_path):
             df = pandas.read_csv(csv_file_path)
             for _, row in df.iterrows():
                 if self.model_type == self.FILTER:
@@ -73,7 +73,7 @@ class ComponentsList:
                 models.append(model)
 
         with ThreadPoolExecutor() as executor:
-            executor.map(process_csv_file, [os.path.join(models_dir, filename) for filename in file_list])
+            executor.map(processCsvFile, [os.path.join(models_dir, filename) for filename in file_list])
 
         return models
 
