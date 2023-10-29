@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor
 import os
 import pandas
 import pickle
@@ -43,35 +44,36 @@ class ComponentsList:
 
     def getModelsList(self, models_dir):
         models = []
+        file_list = [filename for filename in os.listdir(models_dir) if filename.endswith('.csv')]
 
-        for model_info_filename in os.listdir(models_dir):
-            
-            if model_info_filename.endswith('.csv'):
-                model_info_path = os.path.join(models_dir, model_info_filename)
-                df = pandas.read_csv(model_info_path)
+        def process_csv_file(csv_file_path):
+            df = pandas.read_csv(csv_file_path)
+            for _, row in df.iterrows():
+                if self.model_type == self.FILTER:
+                    model = Filter(
+                        row['Model Number'],
+                        row['Case Style'],
+                        row['Description'],
+                        row['Filter Type'],
+                        row['Passband F1 (MHz)'],
+                        row['Passband F2 (MHz)'],
+                        row['Stopband F3 (MHz)'],
+                        row['Stopband F4 (MHz)']
+                    )
+                elif self.model_type == self.AMPLIFIER:
+                    model = Amplifier(
+                        row['Model Number'],
+                        row['Case Style'],
+                        row['Subcategories'],
+                        row['F Low (MHz)'],
+                        row['F High (MHz)'],
+                        row['Gain (dB) Typ.']
+                    )
 
-                for _, row in df.iterrows():
-                    if self.model_type == self.FILTER:
-                        model = Filter(
-                            row['Model Number'],
-                            row['Case Style'],
-                            row['Description'],
-                            row['Filter Type'],
-                            row['Passband F1 (MHz)'],
-                            row['Passband F2 (MHz)'],
-                            row['Stopband F3 (MHz)'],
-                            row['Stopband F4 (MHz)']
-                        )
-                    elif self.model_type == self.AMPLIFIER:
-                        model = Amplifier(
-                            row['Model Number'],
-                            row['Case Style'],
-                            row['Subcategories'],
-                            row['F Low (MHz)'],
-                            row['F High (MHz)'],
-                            row['Gain (dB) Typ.']
-                        )
-                    models.append(model)
+                models.append(model)
+
+        with ThreadPoolExecutor() as executor:
+            executor.map(process_csv_file, [os.path.join(models_dir, filename) for filename in file_list])
 
         return models
 

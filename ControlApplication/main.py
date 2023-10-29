@@ -20,16 +20,20 @@ APP_VERISON = 0.2
 # -----------------------------------------------------------
 # Changelog:
 # -----------------------------------------------------------
-# Version 0.2: When the activateRFPath() function is called, 
+# Version 0.2: 
+# -----------------------------------------------------------
+# When the activateRFPath() function is called, 
 # the activateRFOutput() function is called on a separate 
 # thread for each of the RFSwitch objects. This eliminates 
 # the problem of sequential switching of GPIO states for each 
 # of the RFSwitch objects - first the input switch was switched, 
 # then the output switch. Now, we switch the states of two 
 # switches simultaneously.
-# The Components List constructors are now called in separate 
+# The ComponentsList constructors are now called in separate 
 # threads, which allows reading data about filters and 
 # amplifiers in parallel rather than sequentially.
+# When creating a ComponentsList object, each of the .csv files 
+# is now processed in a separate thread.
 # -----------------------------------------------------------
 
 
