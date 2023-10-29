@@ -28,6 +28,9 @@ APP_VERISON = 0.2
 # of the RFSwitch objects - first the input switch was switched, 
 # then the output switch. Now, we switch the states of two 
 # switches simultaneously.
+# The Components List constructors are now called in separate 
+# threads, which allows reading data about filters and 
+# amplifiers in parallel rather than sequentially.
 # -----------------------------------------------------------
 
 
