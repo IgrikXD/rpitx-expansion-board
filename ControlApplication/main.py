@@ -50,22 +50,10 @@ def main():
         exit(0)
 
     user_interface = UserInterface(Device.DEVICES_LIST, UserInterface.CONFIGURATION_ACTIONS, LOG_FILENAME)
-    # filters_list = ComponentsList(ComponentsList.FILTER, FILTER_MODELS_DIR, FILTER_DUMP_FILE, LOG_FILENAME)
-    # amplifiers_list = ComponentsList(ComponentsList.AMPLIFIER, AMPLIFIER_MODELS_DIR, AMPLIFIER_DUMP_FILE, LOG_FILENAME)
-
-    def perform_filters_action():
-        filters_list = ComponentsList(ComponentsList.FILTER, FILTER_MODELS_DIR, FILTER_DUMP_FILE, LOG_FILENAME)
-        # Здесь добавьте код для выполнения действий с filters_list
-        return filters_list
-
-    def perform_amplifiers_action():
-        amplifiers_list = ComponentsList(ComponentsList.AMPLIFIER, AMPLIFIER_MODELS_DIR, AMPLIFIER_DUMP_FILE, LOG_FILENAME)
-        # Здесь добавьте код для выполнения действий с amplifiers_list
-        return amplifiers_list
 
     with ThreadPoolExecutor(max_workers=2) as executor:
-        filters_future = executor.submit(perform_filters_action)
-        amplifiers_future = executor.submit(perform_amplifiers_action)
+        filters_future = executor.submit(ComponentsList, ComponentsList.FILTER, FILTER_MODELS_DIR, FILTER_DUMP_FILE, LOG_FILENAME)
+        amplifiers_future = executor.submit(ComponentsList, ComponentsList.AMPLIFIER, AMPLIFIER_MODELS_DIR, AMPLIFIER_DUMP_FILE, LOG_FILENAME)
 
         filters_list = filters_future.result()
         amplifiers_list = amplifiers_future.result()
