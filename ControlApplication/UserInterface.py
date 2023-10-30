@@ -139,27 +139,21 @@ class UserInterface:
         while True:
             
             board_status = self.updateBoardInfo(active_filter, is_lna_activated, device)
-            action_choice = self.whiptail_interface.menu(board_status, ACTIONS_LIST)
+            user_choice = self.chooseItem(board_status, ACTIONS_LIST, True)
 
-            if (action_choice[BUTTONS_STATE] == CANCEL_BUTTON):
-                # <Cancel> button has been pressed
-                self.displayFarewellMessageAndExit()
-            else:
-                user_choice = action_choice[USER_CHOICE]
+            if "Activate filter" in user_choice:
+                filter_id = int(user_choice[-1])
+                device_filter = device.filters[filter_id - 1]
+                active_filter = f"{filter_id} - {device_filter.model_number}, {device_filter.description}"
 
-                if "Activate filter" in user_choice:
-                    filter_id = int(user_choice[-1])
-                    device_filter = device.filters[filter_id - 1]
-                    active_filter = f"{filter_id} - {device_filter.model_number}, {device_filter.description}"
-
-                    if device.filter_switch.enableFilter(filter_id):
-                        self.displayInfo(f"Filter {active_filter} enabled!")
-                    else:
-                        self.displayInfo("Error in device configuration!")
-                
-                elif "Toggle LNA" in user_choice:
-                    is_lna_activated = device.lna_switch.toggleLNA()
-                    self.displayInfo("LNA enabled!" if is_lna_activated else "LNA disabled!")
+                if device.filter_switch.enableFilter(filter_id):
+                    self.displayInfo(f"Filter {active_filter} enabled!")
+                else:
+                    self.displayInfo("Error in device configuration!")
+            
+            elif "Toggle LNA" in user_choice:
+                is_lna_activated = device.lna_switch.toggleLNA()
+                self.displayInfo("LNA enabled!" if is_lna_activated else "LNA disabled!")
 
     def selectComponent(self, components_list, prompt):
         unique_case_styles = sorted(set(component.case_style for component in components_list))
