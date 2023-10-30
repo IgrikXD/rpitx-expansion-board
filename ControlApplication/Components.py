@@ -84,7 +84,7 @@ class ComponentsList:
 
         df = pandas.read_csv(csv_file_path)
         for _, row in df.iterrows():
-            if self.model_type == self.FILTER:
+            if (self.model_type == self.FILTER):
                 model = Filter(
                     row['Model Number'],
                     row['Case Style'],
@@ -95,7 +95,7 @@ class ComponentsList:
                     row['Stopband F3 (MHz)'],
                     row['Stopband F4 (MHz)']
                 )
-            elif self.model_type == self.AMPLIFIER:
+            elif (self.model_type == self.AMPLIFIER):
                 model = Amplifier(
                     row['Model Number'],
                     row['Case Style'],
