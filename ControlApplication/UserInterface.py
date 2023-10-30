@@ -77,24 +77,16 @@ class UserInterface:
                                  "Please choose another configuration file or create a new configuration.")
                 return None
             
-            try:
-                with open(f"{CONFIGS_DIR}/{configuration_path[USER_CHOICE]}", 'rb') as device_configuration_file:
-                    device = pickle.load(device_configuration_file)
+            with open(f"{CONFIGS_DIR}/{configuration_path[USER_CHOICE]}", 'rb') as device_configuration_file:
+                device = pickle.load(device_configuration_file)
 
-                if ("--show-debug-info" in sys.argv) and (self.log_filename != None):
-                    with open(self.log_filename, "a") as file:
-                        file.write(f"[INFO]: Device configuration loaded: {configuration_path[USER_CHOICE]}\n")
+            if ("--show-debug-info" in sys.argv) and (self.log_filename != None):
+                with open(self.log_filename, "a") as file:
+                    file.write(f"[INFO]: Device configuration loaded: {configuration_path[USER_CHOICE]}\n")
 
-                self.displayInfo("Configuration loaded succesfully!")
-                
-                return device
+            self.displayInfo("Configuration loaded succesfully!")
             
-            except FileNotFoundError:
-                if ("--show-debug-info" in sys.argv) and (self.log_filename != None):
-                    with open(self.log_filename, "a") as file:
-                        file.write(f"[ERROR]: Configuration file {configuration_path[USER_CHOICE]} not found!\n")
-                # You will be prompted to enter the new file path
-                self.displayInfo("Configuration file not found!")
+            return device
 
     def saveDeviceConfiguration(self, device):
         os.makedirs(CONFIGS_DIR, exist_ok=True)
@@ -108,7 +100,7 @@ class UserInterface:
             with open(self.log_filename, "a") as file:
                 file.write(f"[INFO]: Device configuration info saved: {file_path}\n")
         
-        self.displayInfo(f"Configuration saved!\nFile: {file_path}")
+        self.displayInfo(f"Configuration saved!\n\nFile: {file_path}")
 
     def createActionsList(self, device):
         actions_list = [(f"Activate filter {i + 1}", f"{filter_obj.model_number}, {filter_obj.description}") 
