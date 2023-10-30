@@ -79,6 +79,8 @@ def main():
         showHelpInfo(APP_VERISON, LOG_FILENAME)
         exit(0)
 
+    user_interface = UserInterface(LOG_FILENAME)
+
     # Initializing available filter and amplifier models
     with ThreadPoolExecutor(max_workers=2) as executor:
         filters_future = executor.submit(ComponentsList, ComponentsList.FILTER, FILTER_MODELS_DIR, FILTER_DUMP_FILE, LOG_FILENAME)
@@ -87,14 +89,12 @@ def main():
         filters_list = filters_future.result()
         amplifiers_list = amplifiers_future.result()
 
-    user_interface = UserInterface(Device.DEVICES_LIST, UserInterface.CONFIGURATION_ACTIONS, LOG_FILENAME)
-
     while True:
-        user_action = user_interface.chooseAction()
+        user_action = user_interface.chooseItemOrExit("Choose an action:", UserInterface.CONFIGURATION_ACTIONS)
 
         # "Create a new device configuration" has been choosen
         if (user_action == UserInterface.CONFIGURATION_ACTIONS[0]):
-            board = user_interface.chooseBoard()
+            board = user_interface.chooseItemOrExit("Choose your board:", Device.DEVICES_LIST)
             device = user_interface.createConfiguration(board, filters_list.data, amplifiers_list.data)
             if device == None:
                 continue

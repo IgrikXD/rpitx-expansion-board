@@ -25,10 +25,8 @@ class UserInterface:
         "Load device configuration"
     ]
 
-    def __init__(self, devices_list, configuration_actions, log_filename = None):
+    def __init__(self, log_filename = None):
         self.whiptail_interface = Whiptail(title=APPLICATION_TITLE)
-        self.devices_list = devices_list
-        self.configuration_actions = configuration_actions
         self.log_filename = log_filename
         
         if ("--show-debug-info" in sys.argv) and (log_filename != None):
@@ -38,9 +36,8 @@ class UserInterface:
                 file.write(f"[INFO]: Application running at: {datetime.datetime.now()}!\n")
                 file.write(f"-------------------------------------------------\n")
 
-    def chooseAction(self):
-        user_action = self.whiptail_interface.menu("Choose an action:", self.configuration_actions)
-
+    def chooseItemOrExit(self, prompt, items):
+        user_action = self.whiptail_interface.menu(prompt, items)
         # <Cancel> button has been pressed
         if (user_action[BUTTONS_STATE] == CANCEL_BUTTON):
             self.displayInfo(FAREWELL_MESSAGE)
@@ -56,21 +53,6 @@ class UserInterface:
 
     def displayInfo(self, info):
         self.whiptail_interface.msgbox(info, extra_args=["--scrolltext"])
-
-    def chooseBoard(self):
-        selected_board = self.whiptail_interface.menu("Choose your board:", self.devices_list)
-        # <Cancel> button has been pressed
-        if (selected_board[BUTTONS_STATE] == CANCEL_BUTTON):
-            self.displayInfo(FAREWELL_MESSAGE)
-            
-            if ("--show-debug-info" in sys.argv) and (self.log_filename != None):
-                with open(self.log_filename, "a") as file:
-                    file.write(f"-------------------------------------------------\n")
-                    file.write(f"[INFO]: Application stopped at: {datetime.datetime.now()}!\n")
-                    file.write(f"-------------------------------------------------\n")
-            exit(0)
-
-        return selected_board[USER_CHOICE]
 
     def loadDeviceConfiguration(self):
         while True:
