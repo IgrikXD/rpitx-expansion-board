@@ -141,16 +141,10 @@ class RFSwitchWrapper(RFSwitch):
 
 class FilterSwitch(RFSwitchWrapper):
 
-    FILTER_INPUT_SWITCH_GPIO_PINS = [17, 27, 22]
-    FILTER_OUTPUT_SWITCH_GPIO_PINS = [0, 5, 6]
-
     def enableFilter(self, filter_index):
         return self.activateRFPath(filter_index) 
     
 class LNASwitch(RFSwitchWrapper):
-
-    LNA_INPUT_SWITCH_GPIO_PINS = [23, 24]
-    LNA_OUTPUT_SWITCH_GPIO_PINS = [16, 26]
 
     def __init__(self, input_switch_pinout, output_switch_pinout, switch_truth_table, log_filename):
         super().__init__(input_switch_pinout, output_switch_pinout, switch_truth_table, log_filename)

@@ -1,40 +1,36 @@
 import datetime
-from Device import *
 import os
 import pickle
+from Device import *
 from whiptail import Whiptail
 
+# Which button was pressed?
 OK_BUTTON = 0
 CANCEL_BUTTON = 1
+# Are we reading the state of the button or the result of the execution?
 BUTTONS_STATE = 1
 USER_CHOICE = 0
 
+# Absolute path to the directory with the program source files
 APPLICATION_DIR = os.path.dirname(os.path.abspath(__file__))
-
+# Path to the directory where expansion board configuration files are saved
 CONFIGS_DIR = f"{APPLICATION_DIR}/SavedConfiguration/"
 
 APPLICATION_TITLE = "rpitx-expansion-board control application"
 FAREWELL_MESSAGE = "Thanks for using rpitx-expansion-board project!"
 CONFIGURATION_CREATED_ABORTED = "Configuration creation aborted!"
+DELIMITER = "-" * 60 + "\n"
 
 class UserInterface:
-
-    # List of actions available to perform for a specific device
-    APPLICATION_ACTIONS = [
-        "Create a new device configuration",
-        "Load device configuration"
-    ]
 
     def __init__(self, log_filename = None):
         self.whiptail_interface = Whiptail(title=APPLICATION_TITLE)
         self.log_filename = log_filename
         
         if ("--show-debug-info" in sys.argv) and (log_filename != None):
-            self.displayInfo(f"Debug mode enabled!\nLogs will be writed to: {log_filename}")
+            self.displayInfo(f"Debug mode enabled!\n\nLogs will be writed to: {log_filename}")
             with open(log_filename, "a") as file:
-                file.write(f"-------------------------------------------------\n")
-                file.write(f"[INFO]: Application running at: {datetime.datetime.now()}\n")
-                file.write(f"-------------------------------------------------\n")
+                file.write(f"{DELIMITER}[INFO]: Application running at: {datetime.datetime.now()}\n{DELIMITER}")
 
     def chooseItem(self, prompt, items, exit_if_cancel_pressed = False, cancel_message = None):
         user_action = self.whiptail_interface.menu(prompt, items)
@@ -56,9 +52,7 @@ class UserInterface:
         
         if ("--show-debug-info" in sys.argv) and (self.log_filename != None):
             with open(self.log_filename, "a") as file:
-                file.write(f"-------------------------------------------------\n")
-                file.write(f"[INFO]: Application stopped at: {datetime.datetime.now()}\n")
-                file.write(f"-------------------------------------------------\n")
+                file.write(f"{DELIMITER}[INFO]: Application stopped at: {datetime.datetime.now()}\n{DELIMITER}")
         exit(0)
 
     def loadDeviceConfiguration(self):

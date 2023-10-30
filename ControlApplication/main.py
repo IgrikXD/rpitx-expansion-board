@@ -1,17 +1,26 @@
-
 from colorama import Fore, Style
 from concurrent.futures import ThreadPoolExecutor
 from Device import *
-from RFSwitch import *
 from UserInterface import *
 from Components import *
 
-AMPLIFIER_MODELS_DIR = f"{APPLICATION_DIR}/AmplifiersList"
+# Information related to the configuration of RF filter switches
 FILTER_MODELS_DIR = f"{APPLICATION_DIR}/FiltersList"
 FILTER_DUMP_FILE = "FiltersListDump.pkl"
-AMPLIFIER_DUMP_FILE = "AmplifierDump.pkl"
+FILTER_INPUT_SWITCH_GPIO_PINS = [17, 27, 22]
+FILTER_OUTPUT_SWITCH_GPIO_PINS = [0, 5, 6]
 
+# Information related to the configuration of LNA switches
+AMPLIFIER_MODELS_DIR = f"{APPLICATION_DIR}/AmplifiersList"
+AMPLIFIER_DUMP_FILE = "AmplifierDump.pkl"
+LNA_INPUT_SWITCH_GPIO_PINS = [23, 24]
+LNA_OUTPUT_SWITCH_GPIO_PINS = [16, 26]
+
+# Log file save location
 LOG_FILENAME = f"{APPLICATION_DIR}/DebugInfo.log"
+
+# List of actions available to perform for a specific device
+APPLICATION_ACTIONS = ["Create a new device configuration", "Load device configuration"]
 
 APP_VERISON = 0.3
 # -----------------------------------------------------------
@@ -88,37 +97,36 @@ def main():
         amplifiers_list = amplifiers_future.result()
 
     while True:
-        user_action = user_interface.chooseItem("Choose an action:", UserInterface.APPLICATION_ACTIONS, True)
+        user_action = user_interface.chooseItem("Choose an action:", APPLICATION_ACTIONS, True)
 
         # "Create a new device configuration" has been choosen
-        if (user_action == UserInterface.APPLICATION_ACTIONS[0]):
+        if (user_action == APPLICATION_ACTIONS[0]):
             board = user_interface.chooseItem("Choose your board:", Device.SUPPORTED_DEVICES)
-            if board == None:
+            # <Cancel> button has been pressed
+            if board is None:
                 continue
             device = user_interface.createDeviceConfiguration(board, filters_list.data, amplifiers_list.data)
-            if device == None:
+            if device is None:
                 continue
             user_interface.saveDeviceConfiguration(device)
 
         # "Load device configuration" has been choosen
-        elif (user_action == UserInterface.APPLICATION_ACTIONS[1]):
+        elif (user_action == APPLICATION_ACTIONS[1]):
             device = user_interface.loadDeviceConfiguration()
-            if device == None:
+            # <Cancel> button has been pressed or configuration files are missing
+            if device is None:
                 continue
+        
+        # RF switches are initialized for all types of expansion boards
+        device.initFilterRFSwitches(FILTER_INPUT_SWITCH_GPIO_PINS, FILTER_OUTPUT_SWITCH_GPIO_PINS)
 
-        device.initFilterRFSwitches(FilterSwitch.FILTER_INPUT_SWITCH_GPIO_PINS, 
-                                    FilterSwitch.FILTER_OUTPUT_SWITCH_GPIO_PINS)
-
-        # The LNA will only be initialized if the DEVICE_TYPE_MAPPING structure 
-        # contains switch information to control the LNA
-        device.initLNA(LNASwitch.LNA_INPUT_SWITCH_GPIO_PINS, 
-                       LNASwitch.LNA_OUTPUT_SWITCH_GPIO_PINS)
+        # The LNA will only be initialized if the currently selected expansion board supports it
+        device.initLNA(LNA_INPUT_SWITCH_GPIO_PINS, LNA_OUTPUT_SWITCH_GPIO_PINS)
         
         # Displaying text information about the active device configuration
         user_interface.displayInfo(device.getConfigurationInfo())
         # The main application menu, allowing you to select and enable a specific filter or toogle LNA state
         user_interface.chooseBoardAction(device)
-    # End of while loop
 
 if __name__ == "__main__":
     main()
