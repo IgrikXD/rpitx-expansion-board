@@ -6,9 +6,6 @@ from RFSwitch import *
 from UserInterface import *
 from Components import *
 
-FILTERS_SWITCH_TRUTH_TABLE = 1
-LNA_SWITCH_TRUTH_TABLE = 2
-
 AMPLIFIER_MODELS_DIR = f"{APPLICATION_DIR}/AmplifiersList"
 FILTER_MODELS_DIR = f"{APPLICATION_DIR}/FiltersList"
 FILTER_DUMP_FILE = "FiltersListDump.pkl"
@@ -107,17 +104,14 @@ def main():
             device = user_interface.loadDeviceConfiguration()
             if device == None:
                 continue
-            board = device.model_name
 
         device.initFilterRFSwitches(FilterSwitch.FILTER_INPUT_SWITCH_GPIO_PINS, 
-                                    FilterSwitch.FILTER_OUTPUT_SWITCH_GPIO_PINS, 
-                                    Device.DEVICE_TYPE_MAPPING[board][FILTERS_SWITCH_TRUTH_TABLE])
+                                    FilterSwitch.FILTER_OUTPUT_SWITCH_GPIO_PINS)
 
         # The LNA will only be initialized if the DEVICE_TYPE_MAPPING structure 
         # contains switch information to control the LNA
         device.initLNA(LNASwitch.LNA_INPUT_SWITCH_GPIO_PINS, 
-                       LNASwitch.LNA_OUTPUT_SWITCH_GPIO_PINS, 
-                       Device.DEVICE_TYPE_MAPPING[board][LNA_SWITCH_TRUTH_TABLE])
+                       LNASwitch.LNA_OUTPUT_SWITCH_GPIO_PINS)
         
         # Displaying text information about the active device configuration
         user_interface.displayInfo(device.getConfigurationInfo())
