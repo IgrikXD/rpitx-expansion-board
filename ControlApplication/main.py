@@ -9,16 +9,24 @@ from Components import *
 FILTERS_SWITCH_TRUTH_TABLE = 1
 LNA_SWITCH_TRUTH_TABLE = 2
 
-AMPLIFIER_MODELS_DIR = "./AmplifiersList"
-FILTER_MODELS_DIR = "./FiltersList"
+AMPLIFIER_MODELS_DIR = f"{APPLICATION_DIR}/AmplifiersList"
+FILTER_MODELS_DIR = f"{APPLICATION_DIR}/FiltersList"
 FILTER_DUMP_FILE = "FiltersListDump.pkl"
 AMPLIFIER_DUMP_FILE = "AmplifierDump.pkl"
 
-LOG_FILENAME = "./ControlApplication/DebugInfo.log"
+LOG_FILENAME = f"{APPLICATION_DIR}/DebugInfo.log"
 
-APP_VERISON = 0.2
+APP_VERISON = 0.3
 # -----------------------------------------------------------
 # Changelog:
+# -----------------------------------------------------------
+# Version 0.3: 
+# -----------------------------------------------------------
+# The FiltersList and AmplifiersList directories have been 
+# moved to the ControlApplication directory. Now, dumps of 
+# components and configurations of expansion boards are saved 
+# taking into account the directory in which the UserInterface.py 
+# file is located
 # -----------------------------------------------------------
 # Version 0.2: 
 # -----------------------------------------------------------

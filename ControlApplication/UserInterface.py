@@ -9,7 +9,9 @@ CANCEL_BUTTON = 1
 BUTTONS_STATE = 1
 USER_CHOICE = 0
 
-CONFIGS_DIR = "./SavedConfiguration/"
+APPLICATION_DIR = os.path.dirname(os.path.abspath(__file__))
+
+CONFIGS_DIR = f"{APPLICATION_DIR}/SavedConfiguration/"
 
 APPLICATION_TITLE = "rpitx-expansion-board control application"
 FAREWELL_MESSAGE = "Thanks for using rpitx-expansion-board project!"
