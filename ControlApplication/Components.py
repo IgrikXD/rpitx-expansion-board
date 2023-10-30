@@ -1,8 +1,8 @@
-from colorama import Fore, Style
 import os
 import pandas
 import pickle
 import sys
+from colorama import Fore, Style
 from concurrent.futures import ThreadPoolExecutor
 
 class BaseModel:
@@ -46,7 +46,7 @@ class ComponentsList:
                 self.__saveDump(dump_file_path)
             else:
                 init_error_info = (
-                    f"{Fore.RED}Error while initializing the list of {model_type} components!{Style.RESET_ALL}\n"
+                    f"{Fore.RED}{model_type} components initialization error!{Style.RESET_ALL}\n"
                     f"Make sure that the {Fore.YELLOW}{models_dir}{Style.RESET_ALL} directory contains .csv files describing the available components!" 
                 )
                 print(init_error_info)
@@ -65,7 +65,7 @@ class ComponentsList:
         if not file_list:
             if ("--show-debug-info" in sys.argv) and (self.log_filename is not None):
                 with open(self.log_filename, "a") as file:
-                    file.write(f"[ERROR]: Model .csv files are missing!\n") 
+                    file.write(f"[ERROR]: {self.model_type} model .csv files are missing!\n") 
             return None 
 
         with ThreadPoolExecutor() as executor:
