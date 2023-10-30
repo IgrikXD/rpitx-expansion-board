@@ -66,7 +66,7 @@ class UserInterface:
             configuration_files_list = [file for file in os.listdir(CONFIGS_DIR) if file.endswith(".pkl")]
 
             if not configuration_files_list:
-                self.displayInfo(f"No configuration files found in the directory: {CONFIGS_DIR} "
+                self.displayInfo(f"No configuration files found in the directory: {CONFIGS_DIR}"
                                  "\n\nPlease create a new device configuration!")
                 return None
 
