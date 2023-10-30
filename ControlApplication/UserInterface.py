@@ -36,23 +36,28 @@ class UserInterface:
                 file.write(f"[INFO]: Application running at: {datetime.datetime.now()}!\n")
                 file.write(f"-------------------------------------------------\n")
 
-    def chooseItemOrExit(self, prompt, items):
+    def chooseItem(self, prompt, items, exit_if_cancel_pressed = False):
         user_action = self.whiptail_interface.menu(prompt, items)
         # <Cancel> button has been pressed
         if (user_action[BUTTONS_STATE] == CANCEL_BUTTON):
-            self.displayInfo(FAREWELL_MESSAGE)
-            
-            if ("--show-debug-info" in sys.argv) and (self.log_filename != None):
-                with open(self.log_filename, "a") as file:
-                    file.write(f"-------------------------------------------------\n")
-                    file.write(f"[INFO]: Application stopped at: {datetime.datetime.now()}!\n")
-                    file.write(f"-------------------------------------------------\n")
-            exit(0)
-        
+            if exit_if_cancel_pressed:
+                self.displayFarewellMessageAndExit()
+            return None
+    
         return user_action[USER_CHOICE]
 
     def displayInfo(self, info):
         self.whiptail_interface.msgbox(info, extra_args=["--scrolltext"])
+
+    def displayFarewellMessageAndExit(self):
+        self.displayInfo(FAREWELL_MESSAGE)
+        
+        if ("--show-debug-info" in sys.argv) and (self.log_filename != None):
+            with open(self.log_filename, "a") as file:
+                file.write(f"-------------------------------------------------\n")
+                file.write(f"[INFO]: Application stopped at: {datetime.datetime.now()}!\n")
+                file.write(f"-------------------------------------------------\n")
+        exit(0)
 
     def loadDeviceConfiguration(self):
         while True:
@@ -81,6 +86,7 @@ class UserInterface:
                         file.write(f"[INFO]: Device configuration loaded: {configuration_path[USER_CHOICE]}\n")
 
                 self.displayInfo("Configuration loaded succesfully!")
+                
                 return device
             
             except FileNotFoundError:
@@ -137,13 +143,7 @@ class UserInterface:
 
             if (action_choice[BUTTONS_STATE] == CANCEL_BUTTON):
                 # <Cancel> button has been pressed
-                self.displayInfo(FAREWELL_MESSAGE)
-                if ("--show-debug-info" in sys.argv) and (self.log_filename != None):
-                    with open(self.log_filename, "a") as file:
-                        file.write(f"-------------------------------------------------\n")
-                        file.write(f"[INFO]: Application stopped at: {datetime.datetime.now()}!\n")
-                        file.write(f"-------------------------------------------------\n")
-                exit(0)
+                self.displayFarewellMessageAndExit()
             else:
                 user_choice = action_choice[USER_CHOICE]
 
@@ -184,7 +184,7 @@ class UserInterface:
             if (component.model_number == selected_model_number) and (component.case_style == selected_case_style):
                 return component
 
-    def createConfiguration(self, selected_board, filter_objects, amplifier_objects):
+    def createDeviceConfiguration(self, selected_board, filter_objects, amplifier_objects):
         device = Device(selected_board, self.log_filename)
 
         for i in range(device.DEVICE_TYPE_MAPPING[selected_board][0]):
@@ -200,4 +200,3 @@ class UserInterface:
             device.lna.append(selected_amplifier)
 
         return device
-

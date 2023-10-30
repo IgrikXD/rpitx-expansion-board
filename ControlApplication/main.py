@@ -90,12 +90,14 @@ def main():
         amplifiers_list = amplifiers_future.result()
 
     while True:
-        user_action = user_interface.chooseItemOrExit("Choose an action:", UserInterface.CONFIGURATION_ACTIONS)
+        user_action = user_interface.chooseItem("Choose an action:", UserInterface.CONFIGURATION_ACTIONS, True)
 
         # "Create a new device configuration" has been choosen
         if (user_action == UserInterface.CONFIGURATION_ACTIONS[0]):
-            board = user_interface.chooseItemOrExit("Choose your board:", Device.DEVICES_LIST)
-            device = user_interface.createConfiguration(board, filters_list.data, amplifiers_list.data)
+            board = user_interface.chooseItem("Choose your board:", Device.DEVICES_LIST)
+            if board == None:
+                continue
+            device = user_interface.createDeviceConfiguration(board, filters_list.data, amplifiers_list.data)
             if device == None:
                 continue
             user_interface.saveDeviceConfiguration(device)
