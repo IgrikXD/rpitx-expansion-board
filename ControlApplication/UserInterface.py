@@ -33,13 +33,15 @@ class UserInterface:
             self.displayInfo(f"Debug mode enabled!\nLogs will be writed to: {log_filename}")
             with open(log_filename, "a") as file:
                 file.write(f"-------------------------------------------------\n")
-                file.write(f"[INFO]: Application running at: {datetime.datetime.now()}!\n")
+                file.write(f"[INFO]: Application running at: {datetime.datetime.now()}\n")
                 file.write(f"-------------------------------------------------\n")
 
-    def chooseItem(self, prompt, items, exit_if_cancel_pressed = False):
+    def chooseItem(self, prompt, items, exit_if_cancel_pressed = False, cancel_message = None):
         user_action = self.whiptail_interface.menu(prompt, items)
         # <Cancel> button has been pressed
         if (user_action[BUTTONS_STATE] == CANCEL_BUTTON):
+            if cancel_message:
+                self.displayInfo(cancel_message)
             if exit_if_cancel_pressed:
                 self.displayFarewellMessageAndExit()
             return None
@@ -55,7 +57,7 @@ class UserInterface:
         if ("--show-debug-info" in sys.argv) and (self.log_filename != None):
             with open(self.log_filename, "a") as file:
                 file.write(f"-------------------------------------------------\n")
-                file.write(f"[INFO]: Application stopped at: {datetime.datetime.now()}!\n")
+                file.write(f"[INFO]: Application stopped at: {datetime.datetime.now()}\n")
                 file.write(f"-------------------------------------------------\n")
         exit(0)
 
@@ -68,21 +70,18 @@ class UserInterface:
                                  "\n\nPlease create a new device configuration!")
                 return None
 
-            configuration_path = self.whiptail_interface.menu(
+            configuration_path = self.chooseItem(
                 "Select a configuration file:", configuration_files_list)
-            
-            # <Cancel> button has been pressed
-            if(configuration_path[BUTTONS_STATE] == CANCEL_BUTTON):
-                self.displayInfo("Configuration not loaded! "
-                                 "Please choose another configuration file or create a new configuration.")
+
+            if not configuration_path:
                 return None
             
-            with open(f"{CONFIGS_DIR}/{configuration_path[USER_CHOICE]}", 'rb') as device_configuration_file:
+            with open(f"{CONFIGS_DIR}/{configuration_path}", 'rb') as device_configuration_file:
                 device = pickle.load(device_configuration_file)
 
             if ("--show-debug-info" in sys.argv) and (self.log_filename != None):
                 with open(self.log_filename, "a") as file:
-                    file.write(f"[INFO]: Device configuration loaded: {configuration_path[USER_CHOICE]}\n")
+                    file.write(f"[INFO]: Device configuration loaded: {CONFIGS_DIR}/{configuration_path}\n")
 
             self.displayInfo("Configuration loaded succesfully!")
             
@@ -148,23 +147,17 @@ class UserInterface:
                 self.displayInfo("LNA enabled!" if is_lna_activated else "LNA disabled!")
 
     def selectComponent(self, components_list, prompt):
-        unique_case_styles = sorted(set(component.case_style for component in components_list))
-        case_style_choice = self.whiptail_interface.menu(prompt, unique_case_styles)
-
-        if case_style_choice[BUTTONS_STATE] == CANCEL_BUTTON:
-            self.displayInfo(CONFIGURATION_CREATED_ABORTED)
+        unique_case_styles = sorted(set(component.case_style for component in components_list))   
+        selected_case_style = self.chooseItem(prompt, unique_case_styles, False, CONFIGURATION_CREATED_ABORTED)
+        
+        if not selected_case_style:
             return None
-
-        selected_case_style = case_style_choice[USER_CHOICE]
 
         available_model_numbers = [component.model_number for component in components_list if component.case_style == selected_case_style]
-        model_choice = self.whiptail_interface.menu(f"Available models for '{selected_case_style}' case:", available_model_numbers)
-
-        if model_choice[BUTTONS_STATE] == CANCEL_BUTTON:
-            self.displayInfo(CONFIGURATION_CREATED_ABORTED)
+        selected_model_number = self.chooseItem(f"Available models for '{selected_case_style}' case:", available_model_numbers, False, CONFIGURATION_CREATED_ABORTED)
+        
+        if not selected_model_number:
             return None
-
-        selected_model_number = model_choice[USER_CHOICE]
 
         for component in components_list:
             if (component.model_number == selected_model_number) and (component.case_style == selected_case_style):
