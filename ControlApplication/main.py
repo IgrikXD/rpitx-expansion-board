@@ -25,8 +25,20 @@ APP_VERISON = 0.3
 # The FiltersList and AmplifiersList directories have been 
 # moved to the ControlApplication directory. Now, dumps of 
 # components and configurations of expansion boards are saved 
-# taking into account the directory in which the UserInterface.py 
-# file is located
+# taking into account the parent directory in which the 
+# application source files are located.
+# The application execution order has been changed. Now, when 
+# you start the program, you are asked to choose one of two 
+# possible actions: creating a new device configuration or 
+# loading an existing one.
+# When creating a new configuration, you are prompted to 
+# select the type of device for which the configuration is 
+# being created.
+# When loading an existing configuration, you are prompted to 
+# select a configuration file from the list (the board type is 
+# determined automatically). If the application does not find 
+# information about saved configurations, an information message 
+# is displayed, after which you will be returned to the main menu.
 # -----------------------------------------------------------
 # Version 0.2: 
 # -----------------------------------------------------------
@@ -67,8 +79,6 @@ def main():
         showHelpInfo(APP_VERISON, LOG_FILENAME)
         exit(0)
 
-    user_interface = UserInterface(Device.DEVICES_LIST, UserInterface.CONFIGURATION_ACTIONS, LOG_FILENAME)
-
     # Initializing available filter and amplifier models
     with ThreadPoolExecutor(max_workers=2) as executor:
         filters_future = executor.submit(ComponentsList, ComponentsList.FILTER, FILTER_MODELS_DIR, FILTER_DUMP_FILE, LOG_FILENAME)
@@ -77,27 +87,25 @@ def main():
         filters_list = filters_future.result()
         amplifiers_list = amplifiers_future.result()
 
-    while True:
-        board = user_interface.chooseBoard()
-        action = user_interface.chooseAction()
+    user_interface = UserInterface(Device.DEVICES_LIST, UserInterface.CONFIGURATION_ACTIONS, LOG_FILENAME)
 
-        # <Cancel> button has been pressed
-        # You will be prompted to select your device again
-        if (action[BUTTONS_STATE] == CANCEL_BUTTON):
-            continue
-        
+    while True:
+        user_action = user_interface.chooseAction()
+
         # "Create a new device configuration" has been choosen
-        elif (action[USER_CHOICE] == UserInterface.CONFIGURATION_ACTIONS[0]):
+        if (user_action == UserInterface.CONFIGURATION_ACTIONS[0]):
+            board = user_interface.chooseBoard()
             device = user_interface.createConfiguration(board, filters_list.data, amplifiers_list.data)
             if device == None:
                 continue
             user_interface.saveDeviceConfiguration(device)
 
         # "Load device configuration" has been choosen
-        if (action[USER_CHOICE] == UserInterface.CONFIGURATION_ACTIONS[1]):
-            device = user_interface.loadDeviceConfiguration(board)
+        elif (user_action == UserInterface.CONFIGURATION_ACTIONS[1]):
+            device = user_interface.loadDeviceConfiguration()
             if device == None:
                 continue
+            board = device.model_name
 
         device.initFilterRFSwitches(FilterSwitch.FILTER_INPUT_SWITCH_GPIO_PINS, 
                                     FilterSwitch.FILTER_OUTPUT_SWITCH_GPIO_PINS, 

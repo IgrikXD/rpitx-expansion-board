@@ -39,7 +39,20 @@ class UserInterface:
                 file.write(f"-------------------------------------------------\n")
 
     def chooseAction(self):
-        return self.whiptail_interface.menu("Choose an action:", self.configuration_actions)
+        user_action = self.whiptail_interface.menu("Choose an action:", self.configuration_actions)
+
+        # <Cancel> button has been pressed
+        if (user_action[BUTTONS_STATE] == CANCEL_BUTTON):
+            self.displayInfo(FAREWELL_MESSAGE)
+            
+            if ("--show-debug-info" in sys.argv) and (self.log_filename != None):
+                with open(self.log_filename, "a") as file:
+                    file.write(f"-------------------------------------------------\n")
+                    file.write(f"[INFO]: Application stopped at: {datetime.datetime.now()}!\n")
+                    file.write(f"-------------------------------------------------\n")
+            exit(0)
+        
+        return user_action[USER_CHOICE]
 
     def displayInfo(self, info):
         self.whiptail_interface.msgbox(info, extra_args=["--scrolltext"])
@@ -59,18 +72,26 @@ class UserInterface:
 
         return selected_board[USER_CHOICE]
 
-    def loadDeviceConfiguration(self, selected_board):
+    def loadDeviceConfiguration(self):
         while True:
-            configuration_path = self.whiptail_interface.inputbox("Enter the path of the configuration file:", 
-                                                                  os.path.join(CONFIGS_DIR, f"{selected_board}.pkl"))
+            configuration_files_list = [file for file in os.listdir(CONFIGS_DIR) if file.endswith(".pkl")]
+
+            if not configuration_files_list:
+                self.displayInfo(f"No configuration files found in the directory: {CONFIGS_DIR} "
+                                 "\n\nPlease create a new device configuration!")
+                return None
+
+            configuration_path = self.whiptail_interface.menu(
+                "Select a configuration file:", configuration_files_list)
             
             # <Cancel> button has been pressed
             if(configuration_path[BUTTONS_STATE] == CANCEL_BUTTON):
-                self.displayInfo("Configuration not loaded! Please choose another board.")
+                self.displayInfo("Configuration not loaded! "
+                                 "Please choose another configuration file or create a new configuration.")
                 return None
             
             try:
-                with open(configuration_path[USER_CHOICE], 'rb') as device_configuration_file:
+                with open(f"{CONFIGS_DIR}/{configuration_path[USER_CHOICE]}", 'rb') as device_configuration_file:
                     device = pickle.load(device_configuration_file)
 
                 if ("--show-debug-info" in sys.argv) and (self.log_filename != None):
