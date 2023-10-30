@@ -1,8 +1,9 @@
-from concurrent.futures import ThreadPoolExecutor
+from colorama import Fore, Style
 import os
 import pandas
 import pickle
 import sys
+from concurrent.futures import ThreadPoolExecutor
 
 class BaseModel:
     def __init__(self, model_number, case_style, description):
@@ -33,60 +34,82 @@ class ComponentsList:
 
     def __init__(self, model_type, models_dir, dump_filename, log_filename = None):
         self.model_type = model_type
-        self.dump_file_path = os.path.join(models_dir, dump_filename)
         self.log_filename = log_filename
         
-        if os.path.exists(self.dump_file_path):
-            self.data = self.loadDump(self.dump_file_path)
+        dump_file_path = os.path.join(models_dir, dump_filename)
+        
+        if os.path.exists(dump_file_path):
+            self.data = self.__loadDump(dump_file_path)
         else:
-            self.data = self.getModelsList(models_dir)
-            self.saveDump(self.dump_file_path)
+            self.data = self.__getModelsList(models_dir)
+            if self.data is not None:
+                self.__saveDump(dump_file_path)
+            else:
+                init_error_info = (
+                    f"{Fore.RED}Error while initializing the list of {model_type} components!{Style.RESET_ALL}\n"
+                    f"Make sure that the {Fore.YELLOW}{models_dir}{Style.RESET_ALL} directory contains .csv files describing the available components!" 
+                )
+                print(init_error_info)
+                exit(1)
 
-    def getModelsList(self, models_dir):
+    def __logAction(self, log_message, dump_file_path):
+        if ("--show-debug-info" in sys.argv) and (self.log_filename is not None):
+            with open(self.log_filename, "a") as file:
+                file.write(f"[INFO]: {log_message}: {dump_file_path}\n")       
+
+    def __getModelsList(self, models_dir):
         models = []
+
         file_list = [filename for filename in os.listdir(models_dir) if filename.endswith('.csv')]
 
-        def processCsvFile(csv_file_path):
-            df = pandas.read_csv(csv_file_path)
-            for _, row in df.iterrows():
-                if self.model_type == self.FILTER:
-                    model = Filter(
-                        row['Model Number'],
-                        row['Case Style'],
-                        row['Description'],
-                        row['Filter Type'],
-                        row['Passband F1 (MHz)'],
-                        row['Passband F2 (MHz)'],
-                        row['Stopband F3 (MHz)'],
-                        row['Stopband F4 (MHz)']
-                    )
-                elif self.model_type == self.AMPLIFIER:
-                    model = Amplifier(
-                        row['Model Number'],
-                        row['Case Style'],
-                        row['Subcategories'],
-                        row['F Low (MHz)'],
-                        row['F High (MHz)'],
-                        row['Gain (dB) Typ.']
-                    )
-
-                models.append(model)
+        if not file_list:
+            if ("--show-debug-info" in sys.argv) and (self.log_filename is not None):
+                with open(self.log_filename, "a") as file:
+                    file.write(f"[ERROR]: Model .csv files are missing!\n") 
+            return None 
 
         with ThreadPoolExecutor() as executor:
-            executor.map(processCsvFile, [os.path.join(models_dir, filename) for filename in file_list])
+            for model_list in executor.map(self.__processCsvFile, [os.path.join(models_dir, filename) for filename in file_list]):
+                models.extend(model_list)
 
         return models
 
-    def loadDump(self, dump_file_path):
+    def __loadDump(self, dump_file_path):
         with open(dump_file_path, 'rb') as model_list_dump_file:
-            if ("--show-debug-info" in sys.argv) and (self.log_filename != None):
-                with open(self.log_filename, "a") as file:
-                    file.write(f"[INFO]: Dump loaded: {dump_file_path}\n")
+            self.__logAction("Dump loaded", dump_file_path)
             return pickle.load(model_list_dump_file)
 
-    def saveDump(self, dump_file_path):
+    def __processCsvFile(self, csv_file_path):
+        models_list = []
+
+        df = pandas.read_csv(csv_file_path)
+        for _, row in df.iterrows():
+            if self.model_type == self.FILTER:
+                model = Filter(
+                    row['Model Number'],
+                    row['Case Style'],
+                    row['Description'],
+                    row['Filter Type'],
+                    row['Passband F1 (MHz)'],
+                    row['Passband F2 (MHz)'],
+                    row['Stopband F3 (MHz)'],
+                    row['Stopband F4 (MHz)']
+                )
+            elif self.model_type == self.AMPLIFIER:
+                model = Amplifier(
+                    row['Model Number'],
+                    row['Case Style'],
+                    row['Subcategories'],
+                    row['F Low (MHz)'],
+                    row['F High (MHz)'],
+                    row['Gain (dB) Typ.']
+                )
+
+            models_list.append(model)
+        
+        return models_list
+
+    def __saveDump(self, dump_file_path):
         with open(dump_file_path, 'wb') as model_list_dump_file:
             pickle.dump(self.data, model_list_dump_file)
-        if ("--show-debug-info" in sys.argv) and (self.log_filename != None):
-            with open(self.log_filename, "a") as file:
-                    file.write(f"[INFO]: Dump saved: {dump_file_path}\n")
+            self.__logAction("Dump saved", dump_file_path)
