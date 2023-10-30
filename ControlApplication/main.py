@@ -36,6 +36,7 @@ APP_VERISON = 0.3
 # determined automatically). If the application does not find 
 # information about saved configurations, an information message 
 # is displayed, after which you will be returned to the main menu.
+# Code refactoring.
 # -----------------------------------------------------------
 # Version 0.2: 
 # -----------------------------------------------------------
@@ -87,11 +88,11 @@ def main():
         amplifiers_list = amplifiers_future.result()
 
     while True:
-        user_action = user_interface.chooseItem("Choose an action:", UserInterface.CONFIGURATION_ACTIONS, True)
+        user_action = user_interface.chooseItem("Choose an action:", UserInterface.APPLICATION_ACTIONS, True)
 
         # "Create a new device configuration" has been choosen
-        if (user_action == UserInterface.CONFIGURATION_ACTIONS[0]):
-            board = user_interface.chooseItem("Choose your board:", Device.DEVICES_LIST)
+        if (user_action == UserInterface.APPLICATION_ACTIONS[0]):
+            board = user_interface.chooseItem("Choose your board:", Device.SUPPORTED_DEVICES)
             if board == None:
                 continue
             device = user_interface.createDeviceConfiguration(board, filters_list.data, amplifiers_list.data)
@@ -100,7 +101,7 @@ def main():
             user_interface.saveDeviceConfiguration(device)
 
         # "Load device configuration" has been choosen
-        elif (user_action == UserInterface.CONFIGURATION_ACTIONS[1]):
+        elif (user_action == UserInterface.APPLICATION_ACTIONS[1]):
             device = user_interface.loadDeviceConfiguration()
             if device == None:
                 continue

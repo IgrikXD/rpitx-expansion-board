@@ -2,7 +2,7 @@ from RFSwitch import *
 
 class Device:
     # List of available device for operation
-    DEVICES_LIST = [
+    SUPPORTED_DEVICES = [
         "rpitx-expansion-board-SP3T",
         "rpitx-expansion-board-SP4T",
         "rpitx-expansion-board-SP6T",
@@ -15,13 +15,13 @@ class Device:
     # <DEVICE> : (<NUMBER OF AVAILABLE FILTERS>, <FILTER SWITCH TRUTH TABLE>, <LNA SWITCH THRUTH TABLE>)
     DEVICE_TYPE_MAPPING = {
         # Boards without LNA
-        DEVICES_LIST[0]: (3, RFSwitch.SP3T_SWITCH_TRUTH_TABLE, None),
-        DEVICES_LIST[1]: (4, RFSwitch.SP4T_SWITCH_TRUTH_TABLE, None),
-        DEVICES_LIST[2]: (6, RFSwitch.SP6T_SWITCH_TRUTH_TABLE, None),
+        SUPPORTED_DEVICES[0]: (3, RFSwitch.SP3T_SWITCH_TRUTH_TABLE, None),
+        SUPPORTED_DEVICES[1]: (4, RFSwitch.SP4T_SWITCH_TRUTH_TABLE, None),
+        SUPPORTED_DEVICES[2]: (6, RFSwitch.SP6T_SWITCH_TRUTH_TABLE, None),
         # Boards with LNA
-        DEVICES_LIST[3]: (3, RFSwitch.SP3T_SWITCH_TRUTH_TABLE, RFSwitch.SPDT_SWITCH_TRUTH_TABLE),
-        DEVICES_LIST[4]: (4, RFSwitch.SP4T_SWITCH_TRUTH_TABLE, RFSwitch.SPDT_SWITCH_TRUTH_TABLE),
-        DEVICES_LIST[5]: (6, RFSwitch.SP6T_SWITCH_TRUTH_TABLE, RFSwitch.SPDT_SWITCH_TRUTH_TABLE)
+        SUPPORTED_DEVICES[3]: (3, RFSwitch.SP3T_SWITCH_TRUTH_TABLE, RFSwitch.SPDT_SWITCH_TRUTH_TABLE),
+        SUPPORTED_DEVICES[4]: (4, RFSwitch.SP4T_SWITCH_TRUTH_TABLE, RFSwitch.SPDT_SWITCH_TRUTH_TABLE),
+        SUPPORTED_DEVICES[5]: (6, RFSwitch.SP6T_SWITCH_TRUTH_TABLE, RFSwitch.SPDT_SWITCH_TRUTH_TABLE)
     }
 
     FILTERS_SWITCH_TRUTH_TABLE = 1

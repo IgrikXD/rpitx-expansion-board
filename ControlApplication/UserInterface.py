@@ -20,7 +20,7 @@ CONFIGURATION_CREATED_ABORTED = "Configuration creation aborted!"
 class UserInterface:
 
     # List of actions available to perform for a specific device
-    CONFIGURATION_ACTIONS = [
+    APPLICATION_ACTIONS = [
         "Create a new device configuration",
         "Load device configuration"
     ]
