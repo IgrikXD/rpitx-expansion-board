@@ -4,7 +4,7 @@ import pickle
 import sys
 from colorama import Fore, Style
 from concurrent.futures import ThreadPoolExecutor
-from Logger import *
+from ControlApplication.Logger import *
 
 class BaseModel:
     def __init__(self, model_number, case_style, description):

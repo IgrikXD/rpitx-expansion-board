@@ -1,4 +1,4 @@
-from RFSwitch import * 
+from ControlApplication.RFSwitch import * 
 
 class Device:
     # List of available device for operation

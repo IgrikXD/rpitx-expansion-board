@@ -1,7 +1,7 @@
 import os
 import pickle
-from Device import *
-from Logger import *
+from ControlApplication.Device import *
+from ControlApplication.Logger import *
 from whiptail import Whiptail
 
 # Which button was pressed?

@@ -2,7 +2,7 @@ from concurrent.futures import ThreadPoolExecutor
 from gpiozero.pins.mock import MockFactory
 from gpiozero import OutputDevice
 from gpiozero import BadPinFactory
-from Logger import *
+from ControlApplication.Logger import *
 import sys
 
 # Aliases for high and low logic levels
