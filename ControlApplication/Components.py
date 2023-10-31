@@ -4,6 +4,7 @@ import pickle
 import sys
 from colorama import Fore, Style
 from concurrent.futures import ThreadPoolExecutor
+from Logger import *
 
 class BaseModel:
     def __init__(self, model_number, case_style, description):
@@ -34,7 +35,10 @@ class ComponentsList:
 
     def __init__(self, model_type, models_dir, dump_filename, log_filename = None):
         self.model_type = model_type
-        self.log_filename = log_filename
+        if ("--show-debug-info" in sys.argv) and log_filename:
+            self.logger = Logger(log_filename)
+        else:
+            self.logger = None
         
         dump_file_path = os.path.join(models_dir, dump_filename)
         
@@ -52,20 +56,14 @@ class ComponentsList:
                 print(init_error_info)
                 exit(1)
 
-    def __logAction(self, log_message, dump_file_path):
-        if ("--show-debug-info" in sys.argv) and (self.log_filename is not None):
-            with open(self.log_filename, "a") as file:
-                file.write(f"[INFO]: {log_message}: {dump_file_path}\n")       
-
     def __getModelsList(self, models_dir):
         models = []
 
         file_list = [filename for filename in os.listdir(models_dir) if filename.endswith('.csv')]
 
         if not file_list:
-            if ("--show-debug-info" in sys.argv) and (self.log_filename is not None):
-                with open(self.log_filename, "a") as file:
-                    file.write(f"[ERROR]: {self.model_type} model .csv files are missing!\n") 
+            if self.logger:
+                self.logger.logMessage(f"{self.model_type} model .csv files are missing!", Logger.LogLevel.ERROR)
             return None 
 
         with ThreadPoolExecutor() as executor:
@@ -76,7 +74,8 @@ class ComponentsList:
 
     def __loadDump(self, dump_file_path):
         with open(dump_file_path, 'rb') as model_list_dump_file:
-            self.__logAction("Dump loaded", dump_file_path)
+            if self.logger:
+                self.logger.logMessage(f"Dump loaded: {dump_file_path}", Logger.LogLevel.INFO)
             return pickle.load(model_list_dump_file)
 
     def __processCsvFile(self, csv_file_path):
@@ -112,4 +111,5 @@ class ComponentsList:
     def __saveDump(self, dump_file_path):
         with open(dump_file_path, 'wb') as model_list_dump_file:
             pickle.dump(self.data, model_list_dump_file)
-            self.__logAction("Dump saved", dump_file_path)
+            if self.logger:
+                self.logger.logMessage(f"Dump saved: {dump_file_path}", Logger.LogLevel.INFO)

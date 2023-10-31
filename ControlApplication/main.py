@@ -33,6 +33,7 @@ APP_VERISON = 0.3
 # components and configurations of expansion boards are saved 
 # taking into account the parent directory in which the 
 # application source files are located.
+# 
 # The application execution order has been changed. Now, when 
 # you start the program, you are asked to choose one of two 
 # possible actions: creating a new device configuration or 
@@ -45,6 +46,17 @@ APP_VERISON = 0.3
 # determined automatically). If the application does not find 
 # information about saved configurations, an information message 
 # is displayed, after which you will be returned to the main menu.
+# 
+# Checking for the presence of .csv files of component models
+# When the program starts, it checks whether .csv files exist in 
+# the FiltersList and AmplifiersList directories. These files are
+# used to build a list of available components when creating a 
+# device configuration. If it is not possible to load the 
+# previously created .pkl dump of the list of components and the 
+# necessary .csv files to build the list of components are 
+# missing, an error message is displayed in the console and the 
+# program ends.
+# 
 # Code refactoring.
 # -----------------------------------------------------------
 # Version 0.2: 
@@ -56,13 +68,16 @@ APP_VERISON = 0.3
 # of the RFSwitch objects - first the input switch was switched, 
 # then the output switch. Now, we switch the states of two 
 # switches simultaneously.
+# 
 # The ComponentsList constructors are now called in separate 
 # threads, which allows reading data about filters and 
 # amplifiers in parallel rather than sequentially.
 # When creating a ComponentsList object, each of the .csv files 
 # is now processed in a separate thread.
+# 
 # Added highlighting of application start and stop timestamp 
 # using '-' signs.
+# 
 # whiptail_interface.msgbox() is now called with an additional 
 # --scrolltext parameter
 # -----------------------------------------------------------

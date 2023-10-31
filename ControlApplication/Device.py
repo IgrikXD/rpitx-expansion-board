@@ -48,7 +48,6 @@ class Device:
                                         switch_truth_table, 
                                         self.log_filename)
 
-    
     def getConfigurationInfo(self):
         delimiter = "=" * 60
         configuration_info = f"{delimiter}\nActive board configuration:\n"

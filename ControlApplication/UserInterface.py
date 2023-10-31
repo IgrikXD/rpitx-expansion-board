@@ -1,7 +1,7 @@
-import datetime
 import os
 import pickle
 from Device import *
+from Logger import *
 from whiptail import Whiptail
 
 # Which button was pressed?
@@ -19,7 +19,6 @@ CONFIGS_DIR = f"{APPLICATION_DIR}/SavedConfiguration/"
 APPLICATION_TITLE = "rpitx-expansion-board control application"
 FAREWELL_MESSAGE = "Thanks for using rpitx-expansion-board project!"
 CONFIGURATION_CREATED_ABORTED = "Configuration creation aborted!"
-DELIMITER = "-" * 60 + "\n"
 
 class UserInterface:
 
@@ -27,10 +26,14 @@ class UserInterface:
         self.whiptail_interface = Whiptail(title=APPLICATION_TITLE)
         self.log_filename = log_filename
         
-        if ("--show-debug-info" in sys.argv) and (log_filename != None):
+        if ("--show-debug-info" in sys.argv) and log_filename:
+            self.logger = Logger(log_filename)
+        else:
+            self.logger = None
+        
+        if self.logger:
             self.displayInfo(f"Debug mode enabled!\n\nLogs will be writed to: {log_filename}")
-            with open(log_filename, "a") as file:
-                file.write(f"{DELIMITER}[INFO]: Application running at: {datetime.datetime.now()}\n{DELIMITER}")
+            self.logger.logMessage(f"Application running!", Logger.LogLevel.INFO, True, True)
 
     def chooseItem(self, prompt, items, exit_if_cancel_pressed = False, cancel_message = None):
         user_action = self.whiptail_interface.menu(prompt, items)
@@ -50,9 +53,8 @@ class UserInterface:
     def displayFarewellMessageAndExit(self):
         self.displayInfo(FAREWELL_MESSAGE)
         
-        if ("--show-debug-info" in sys.argv) and (self.log_filename != None):
-            with open(self.log_filename, "a") as file:
-                file.write(f"{DELIMITER}[INFO]: Application stopped at: {datetime.datetime.now()}\n{DELIMITER}")
+        if self.logger:
+            self.logger.logMessage(f"Application stopped at: {datetime.datetime.now()}", Logger.LogLevel.INFO, True, True)
         exit(0)
 
     def loadDeviceConfiguration(self):
@@ -73,9 +75,8 @@ class UserInterface:
             with open(f"{CONFIGS_DIR}/{configuration_path}", 'rb') as device_configuration_file:
                 device = pickle.load(device_configuration_file)
 
-            if ("--show-debug-info" in sys.argv) and (self.log_filename != None):
-                with open(self.log_filename, "a") as file:
-                    file.write(f"[INFO]: Device configuration loaded: {CONFIGS_DIR}/{configuration_path}\n")
+            if self.logger:
+                self.logger.logMessage(f"Device configuration loaded: {CONFIGS_DIR}/{configuration_path}", Logger.LogLevel.INFO)
 
             self.displayInfo("Configuration loaded succesfully!")
             
@@ -89,9 +90,8 @@ class UserInterface:
         with open(file_path, 'wb') as device_configuration_file:
             pickle.dump(device, device_configuration_file)
         
-        if ("--show-debug-info" in sys.argv) and (self.log_filename != None):
-            with open(self.log_filename, "a") as file:
-                file.write(f"[INFO]: Device configuration info saved: {file_path}\n")
+        if self.logger:
+            self.logger.logMessage(f"Device configuration info saved: {file_path}", Logger.LogLevel.INFO)
         
         self.displayInfo(f"Configuration saved!\n\nFile: {file_path}")
 

@@ -2,6 +2,7 @@ from concurrent.futures import ThreadPoolExecutor
 from gpiozero.pins.mock import MockFactory
 from gpiozero import OutputDevice
 from gpiozero import BadPinFactory
+from Logger import *
 import sys
 
 # Aliases for high and low logic levels
@@ -38,13 +39,18 @@ class RFSwitch():
     }
 
     def __init__(self, switch_pinout, switch_truth_table, log_filename = None):
-        self.log_filename = log_filename
+
+        if ("--show-debug-info" in sys.argv) and log_filename:
+            self.logger = Logger(log_filename)
+        else:
+            self.logger = None
+
         # Used BCM port numbering by default
         if "--use-mock-gpio" in sys.argv:
             used_pin_factory = MockFactory()
-            if ("--show-debug-info" in sys.argv) and (self.log_filename != None):
-                with open(self.log_filename, "a") as file:
-                    file.write(f"[INFO]: gpiozero used MockFactory for GPIO operation!\n")
+
+            if self.logger:
+                self.logger.logMessage("gpiozero used MockFactory for GPIO operation!", Logger.LogLevel.INFO)
         else:
             used_pin_factory = None
         
@@ -58,80 +64,73 @@ class RFSwitch():
                 for gpio_number in self.switch_pinout
             ]
             
-            if ("--show-debug-info" in sys.argv) and (self.log_filename != None):
-                with open(self.log_filename, "a") as file:
-                    file.write(f"[INFO]: RFSwitch initialized on GPIO: {switch_pinout}\n")
+            if self.logger:
+                self.logger.logMessage(f"RFSwitch initialized on GPIO: {switch_pinout}", Logger.LogLevel.INFO)
 
         except BadPinFactory:
             self.switch_control = None
 
-            if ("--show-debug-info" in sys.argv) and (self.log_filename != None):
-                with open(self.log_filename, "a") as file:
-                    file.write(f"[ERROR]: RFSwitch not initialized on GPIO: {switch_pinout}\n")
+            if self.logger:
+                self.logger.logMessage(f"RFSwitch not initialized on GPIO: {switch_pinout}", Logger.LogLevel.ERROR)
             
     def activateRFOutput(self, rf_output):
         if (self.switch_control and (self.active_rf_output != rf_output or self.active_rf_output == None)):
             try:
                 self.active_rf_output = rf_output
 
-                if ("--show-debug-info" in sys.argv) and (self.log_filename != None):
-                    with open(self.log_filename, "a") as file:
-                        file.write(f"-------------------------------------------------\n")
-                        file.write(f"[INFO]: RF path {rf_output} activated!\n")
-                        file.write(f"-------------------------------------------------\n")
-                        file.write(f"[INFO]: START OF CNANGING GPIO STATE PROCESS\n")
+                if self.logger:
+                    self.logger.logMessage(f"RF path {rf_output} activated!", Logger.LogLevel.INFO, True)
+                    self.logger.logMessage("START OF CNANGING GPIO STATE PROCESS", Logger.LogLevel.INFO)
 
                 for output_gpio_obj, gpio_state in zip(self.switch_control, self.switch_truth_table[rf_output]):
                     output_gpio_obj.value = gpio_state
                     
-                    if ("--show-debug-info" in sys.argv) and (self.log_filename != None):
-                        with open(self.log_filename, "a") as file:
-                            file.write(f"{output_gpio_obj.pin}: {gpio_state}\n")
+                    if self.logger:
+                        self.logger.logMessage(f"{output_gpio_obj.pin}: {gpio_state}")
                 
             except Exception:
-                if ("--show-debug-info" in sys.argv) and (self.log_filename != None):
-                    with open(self.log_filename, "a") as file:
-                        file.write(f"[ERROR]: Unable to set state {gpio_state} for {output_gpio_obj.pin}!")
-                        file.write(f"[INFO]: END OF CHANGING GPIO STATE\n")
-                        file.write(f"-------------------------------------------------\n")
+                if self.logger:
+                    self.logger.logMessage(f"Unable to set state {gpio_state} for {output_gpio_obj.pin}!", 
+                                           Logger.LogLevel.ERROR)
+                    self.logger.logMessage("END OF CHANGING GPIO STATE PROCESS", Logger.LogLevel.INFO, True)
                 
                 return False
             
-            if ("--show-debug-info" in sys.argv) and (self.log_filename != None):
-                with open(self.log_filename, "a") as file:
-                    file.write(f"[INFO]: END OF CHANGING GPIO STATE PROCESS\n")
-                    file.write(f"-------------------------------------------------\n")
-            
+            if self.logger:
+                self.logger.logMessage("END OF CHANGING GPIO STATE PROCESS", Logger.LogLevel.INFO, True)
+
             return True
         
         elif (not self.switch_control):
-            if ("--show-debug-info" in sys.argv) and (self.log_filename != None):
-                with open(self.log_filename, "a") as file:
-                    file.write(f"[ERROR]: RFSwitch not initialized! GPIO {self.switch_pinout} state not changed!\n")
+            if self.logger:
+                self.logger.logMessage(f"RFSwitch not initialized! GPIO {self.switch_pinout} state not changed!", 
+                                       Logger.LogLevel.ERROR)
             return False
 
         elif (self.active_rf_output == rf_output):
-            if ("--show-debug-info" in sys.argv) and (self.log_filename != None):
-                with open(self.log_filename, "a") as file:
-                    file.write(f"[INFO]: Trying to activate already active RF path {rf_output}!\n")
+            if self.logger:
+                self.logger.logMessage(f"Trying to activate already active RF path {rf_output}!", Logger.LogLevel.INFO)
             return True
 
-class RFSwitchWrapper(RFSwitch):
+class RFSwitchWrapper():
     def __init__(self, input_switch_pinout, output_switch_pinout, switch_truth_table, log_filename = None):
         self.input_switch = RFSwitch(input_switch_pinout, switch_truth_table, log_filename)
         self.output_switch = RFSwitch(output_switch_pinout, switch_truth_table, log_filename)
-        self.log_filename = log_filename
+        
+        if ("--show-debug-info" in sys.argv) and log_filename:
+            self.logger = Logger(log_filename)
+        else:
+            self.logger = None
     
     def activateRFPath(self, rf_path_index):
         # We activate two switches at the same time because we need to create a 
         # path for the signal to pass through a particular filter. This is 
         # achieved by sending the output signal to the input switch, passing 
         # it through a filter and then exiting through the output switch
-        if ("--show-debug-info" in sys.argv) and (self.log_filename != None):
-            with open(self.log_filename, "a") as file:
-                file.write(f"[INFO]: RFSwitchWrapper.activateRFPath() function called!\n")
-                file.write(f"[INFO]: Changing the state of the GPIO ports for each of the "
-                           "RFSwitch is performed in a separate thread!\n")
+        if self.logger:
+            self.logger.logMessage("RFSwitchWrapper.activateRFPath() function called!", Logger.LogLevel.INFO)
+            self.logger.logMessage("Changing the state of the GPIO ports for each of the "
+                           "RFSwitch is performed in a separate thread!", Logger.LogLevel.INFO)
     
         with ThreadPoolExecutor(max_workers=2) as executor:
             input_switch_state_change_thread = executor.submit(self.input_switch.activateRFOutput, rf_path_index)
