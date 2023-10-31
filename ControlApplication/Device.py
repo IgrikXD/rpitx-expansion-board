@@ -2,7 +2,7 @@ from RFSwitch import *
 
 class Device:
     # List of available device for operation
-    DEVICES_LIST = [
+    SUPPORTED_DEVICES = [
         "rpitx-expansion-board-SP3T",
         "rpitx-expansion-board-SP4T",
         "rpitx-expansion-board-SP6T",
@@ -15,14 +15,17 @@ class Device:
     # <DEVICE> : (<NUMBER OF AVAILABLE FILTERS>, <FILTER SWITCH TRUTH TABLE>, <LNA SWITCH THRUTH TABLE>)
     DEVICE_TYPE_MAPPING = {
         # Boards without LNA
-        DEVICES_LIST[0]: (3, RFSwitch.SP3T_SWITCH_TRUTH_TABLE, None),
-        DEVICES_LIST[1]: (4, RFSwitch.SP4T_SWITCH_TRUTH_TABLE, None),
-        DEVICES_LIST[2]: (6, RFSwitch.SP6T_SWITCH_TRUTH_TABLE, None),
+        SUPPORTED_DEVICES[0]: (3, RFSwitch.SP3T_SWITCH_TRUTH_TABLE, None),
+        SUPPORTED_DEVICES[1]: (4, RFSwitch.SP4T_SWITCH_TRUTH_TABLE, None),
+        SUPPORTED_DEVICES[2]: (6, RFSwitch.SP6T_SWITCH_TRUTH_TABLE, None),
         # Boards with LNA
-        DEVICES_LIST[3]: (3, RFSwitch.SP3T_SWITCH_TRUTH_TABLE, RFSwitch.SPDT_SWITCH_TRUTH_TABLE),
-        DEVICES_LIST[4]: (4, RFSwitch.SP4T_SWITCH_TRUTH_TABLE, RFSwitch.SPDT_SWITCH_TRUTH_TABLE),
-        DEVICES_LIST[5]: (6, RFSwitch.SP6T_SWITCH_TRUTH_TABLE, RFSwitch.SPDT_SWITCH_TRUTH_TABLE)
+        SUPPORTED_DEVICES[3]: (3, RFSwitch.SP3T_SWITCH_TRUTH_TABLE, RFSwitch.SPDT_SWITCH_TRUTH_TABLE),
+        SUPPORTED_DEVICES[4]: (4, RFSwitch.SP4T_SWITCH_TRUTH_TABLE, RFSwitch.SPDT_SWITCH_TRUTH_TABLE),
+        SUPPORTED_DEVICES[5]: (6, RFSwitch.SP6T_SWITCH_TRUTH_TABLE, RFSwitch.SPDT_SWITCH_TRUTH_TABLE)
     }
+
+    FILTERS_SWITCH_TRUTH_TABLE = 1
+    LNA_SWITCH_TRUTH_TABLE = 2
 
     def __init__(self, model_name, log_filename = None):
         self.model_name = model_name
@@ -32,15 +35,19 @@ class Device:
         self.lna_switch = None
         self.log_filename = log_filename
 
-    def initFilterRFSwitches(self, input_switch_pinout, output_switch_pinout, switch_truth_table):
+    def initFilterRFSwitches(self, input_switch_pinout, output_switch_pinout):
         if self.filter_switch is None:
-            self.filter_switch = FilterSwitch(input_switch_pinout, output_switch_pinout, switch_truth_table, self.log_filename)
+            self.filter_switch = FilterSwitch(input_switch_pinout, output_switch_pinout, 
+                                              Device.DEVICE_TYPE_MAPPING[self.model_name][self.FILTERS_SWITCH_TRUTH_TABLE], 
+                                              self.log_filename)
 
-    def initLNA(self, input_switch_pinout, output_switch_pinout, switch_truth_table):
+    def initLNA(self, input_switch_pinout, output_switch_pinout):
+        switch_truth_table = Device.DEVICE_TYPE_MAPPING[self.model_name][self.LNA_SWITCH_TRUTH_TABLE]
         if switch_truth_table and self.lna_switch is None:
-            self.lna_switch = LNASwitch(input_switch_pinout, output_switch_pinout, switch_truth_table, self.log_filename)
+            self.lna_switch = LNASwitch(input_switch_pinout, output_switch_pinout, 
+                                        switch_truth_table, 
+                                        self.log_filename)
 
-    
     def getConfigurationInfo(self):
         delimiter = "=" * 60
         configuration_info = f"{delimiter}\nActive board configuration:\n"

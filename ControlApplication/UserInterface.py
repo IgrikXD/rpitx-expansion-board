@@ -1,15 +1,20 @@
-import datetime
-from Device import *
 import os
 import pickle
+from Device import *
+from Logger import *
 from whiptail import Whiptail
 
+# Which button was pressed?
 OK_BUTTON = 0
 CANCEL_BUTTON = 1
+# Are we reading the state of the button or the result of the execution?
 BUTTONS_STATE = 1
 USER_CHOICE = 0
 
-CONFIGS_DIR = "./SavedConfiguration/"
+# Absolute path to the directory with the program source files
+APPLICATION_DIR = os.path.dirname(os.path.abspath(__file__))
+# Path to the directory where expansion board configuration files are saved
+CONFIGS_DIR = f"{APPLICATION_DIR}/SavedConfiguration/"
 
 APPLICATION_TITLE = "rpitx-expansion-board control application"
 FAREWELL_MESSAGE = "Thanks for using rpitx-expansion-board project!"
@@ -17,73 +22,65 @@ CONFIGURATION_CREATED_ABORTED = "Configuration creation aborted!"
 
 class UserInterface:
 
-    # List of actions available to perform for a specific device
-    CONFIGURATION_ACTIONS = [
-        "Create a new device configuration",
-        "Load device configuration"
-    ]
-
-    def __init__(self, devices_list, configuration_actions, log_filename = None):
+    def __init__(self, log_filename = None):
         self.whiptail_interface = Whiptail(title=APPLICATION_TITLE)
-        self.devices_list = devices_list
-        self.configuration_actions = configuration_actions
         self.log_filename = log_filename
         
-        if ("--show-debug-info" in sys.argv) and (log_filename != None):
-            self.displayInfo(f"Debug mode enabled!\nLogs will be writed to: {log_filename}")
-            with open(log_filename, "a") as file:
-                file.write(f"-------------------------------------------------\n")
-                file.write(f"[INFO]: Application running at: {datetime.datetime.now()}!\n")
-                file.write(f"-------------------------------------------------\n")
+        if ("--show-debug-info" in sys.argv) and log_filename:
+            self.logger = Logger(log_filename)
+        else:
+            self.logger = None
+        
+        if self.logger:
+            self.displayInfo(f"Debug mode enabled!\n\nLogs will be writed to: {log_filename}")
+            self.logger.logMessage(f"Application running!", Logger.LogLevel.INFO, True, True)
 
-    def chooseAction(self):
-        return self.whiptail_interface.menu("Choose an action:", self.configuration_actions)
+    def chooseItem(self, prompt, items, exit_if_cancel_pressed = False, cancel_message = None):
+        user_action = self.whiptail_interface.menu(prompt, items)
+        # <Cancel> button has been pressed
+        if (user_action[BUTTONS_STATE] == CANCEL_BUTTON):
+            if cancel_message:
+                self.displayInfo(cancel_message)
+            if exit_if_cancel_pressed:
+                self.displayFarewellMessageAndExit()
+            return None
+    
+        return user_action[USER_CHOICE]
 
     def displayInfo(self, info):
         self.whiptail_interface.msgbox(info, extra_args=["--scrolltext"])
 
-    def chooseBoard(self):
-        selected_board = self.whiptail_interface.menu("Choose your board:", self.devices_list)
-        # <Cancel> button has been pressed
-        if (selected_board[BUTTONS_STATE] == CANCEL_BUTTON):
-            self.displayInfo(FAREWELL_MESSAGE)
-            
-            if ("--show-debug-info" in sys.argv) and (self.log_filename != None):
-                with open(self.log_filename, "a") as file:
-                    file.write(f"-------------------------------------------------\n")
-                    file.write(f"[INFO]: Application stopped at: {datetime.datetime.now()}!\n")
-                    file.write(f"-------------------------------------------------\n")
-            exit(0)
+    def displayFarewellMessageAndExit(self):
+        self.displayInfo(FAREWELL_MESSAGE)
+        
+        if self.logger:
+            self.logger.logMessage(f"Application stopped!", Logger.LogLevel.INFO, True, True)
+        exit(0)
 
-        return selected_board[USER_CHOICE]
-
-    def loadDeviceConfiguration(self, selected_board):
+    def loadDeviceConfiguration(self):
         while True:
-            configuration_path = self.whiptail_interface.inputbox("Enter the path of the configuration file:", 
-                                                                  os.path.join(CONFIGS_DIR, f"{selected_board}.pkl"))
-            
-            # <Cancel> button has been pressed
-            if(configuration_path[BUTTONS_STATE] == CANCEL_BUTTON):
-                self.displayInfo("Configuration not loaded! Please choose another board.")
+            configuration_files_list = [file for file in os.listdir(CONFIGS_DIR) if file.endswith(".pkl")]
+
+            if not configuration_files_list:
+                self.displayInfo(f"No configuration files found in the directory: {CONFIGS_DIR}"
+                                 "\n\nPlease create a new device configuration!")
+                return None
+
+            configuration_path = self.chooseItem(
+                "Select a configuration file:", configuration_files_list)
+
+            if not configuration_path:
                 return None
             
-            try:
-                with open(configuration_path[USER_CHOICE], 'rb') as device_configuration_file:
-                    device = pickle.load(device_configuration_file)
+            with open(f"{CONFIGS_DIR}/{configuration_path}", 'rb') as device_configuration_file:
+                device = pickle.load(device_configuration_file)
 
-                if ("--show-debug-info" in sys.argv) and (self.log_filename != None):
-                    with open(self.log_filename, "a") as file:
-                        file.write(f"[INFO]: Device configuration loaded: {configuration_path[USER_CHOICE]}\n")
+            if self.logger:
+                self.logger.logMessage(f"Device configuration loaded: {CONFIGS_DIR}/{configuration_path}", Logger.LogLevel.INFO)
 
-                self.displayInfo("Configuration loaded succesfully!")
-                return device
+            self.displayInfo("Configuration loaded succesfully!")
             
-            except FileNotFoundError:
-                if ("--show-debug-info" in sys.argv) and (self.log_filename != None):
-                    with open(self.log_filename, "a") as file:
-                        file.write(f"[ERROR]: Configuration file {configuration_path[USER_CHOICE]} not found!\n")
-                # You will be prompted to enter the new file path
-                self.displayInfo("Configuration file not found!")
+            return device
 
     def saveDeviceConfiguration(self, device):
         os.makedirs(CONFIGS_DIR, exist_ok=True)
@@ -93,11 +90,10 @@ class UserInterface:
         with open(file_path, 'wb') as device_configuration_file:
             pickle.dump(device, device_configuration_file)
         
-        if ("--show-debug-info" in sys.argv) and (self.log_filename != None):
-            with open(self.log_filename, "a") as file:
-                file.write(f"[INFO]: Device configuration info saved: {file_path}\n")
+        if self.logger:
+            self.logger.logMessage(f"Device configuration info saved: {file_path}", Logger.LogLevel.INFO)
         
-        self.displayInfo(f"Configuration saved!\nFile: {file_path}")
+        self.displayInfo(f"Configuration saved!\n\nFile: {file_path}")
 
     def createActionsList(self, device):
         actions_list = [(f"Activate filter {i + 1}", f"{filter_obj.model_number}, {filter_obj.description}") 
@@ -128,58 +124,40 @@ class UserInterface:
         while True:
             
             board_status = self.updateBoardInfo(active_filter, is_lna_activated, device)
-            action_choice = self.whiptail_interface.menu(board_status, ACTIONS_LIST)
+            user_choice = self.chooseItem(board_status, ACTIONS_LIST, True)
 
-            if (action_choice[BUTTONS_STATE] == CANCEL_BUTTON):
-                # <Cancel> button has been pressed
-                self.displayInfo(FAREWELL_MESSAGE)
-                if ("--show-debug-info" in sys.argv) and (self.log_filename != None):
-                    with open(self.log_filename, "a") as file:
-                        file.write(f"-------------------------------------------------\n")
-                        file.write(f"[INFO]: Application stopped at: {datetime.datetime.now()}!\n")
-                        file.write(f"-------------------------------------------------\n")
-                exit(0)
-            else:
-                user_choice = action_choice[USER_CHOICE]
+            if "Activate filter" in user_choice:
+                filter_id = int(user_choice[-1])
+                device_filter = device.filters[filter_id - 1]
+                active_filter = f"{filter_id} - {device_filter.model_number}, {device_filter.description}"
 
-                if "Activate filter" in user_choice:
-                    filter_id = int(user_choice[-1])
-                    device_filter = device.filters[filter_id - 1]
-                    active_filter = f"{filter_id} - {device_filter.model_number}, {device_filter.description}"
-
-                    if device.filter_switch.enableFilter(filter_id):
-                        self.displayInfo(f"Filter {active_filter} enabled!")
-                    else:
-                        self.displayInfo("Error in device configuration!")
-                
-                elif "Toggle LNA" in user_choice:
-                    is_lna_activated = device.lna_switch.toggleLNA()
-                    self.displayInfo("LNA enabled!" if is_lna_activated else "LNA disabled!")
+                if device.filter_switch.enableFilter(filter_id):
+                    self.displayInfo(f"Filter {active_filter} enabled!")
+                else:
+                    self.displayInfo("Error in device configuration!")
+            
+            elif "Toggle LNA" in user_choice:
+                is_lna_activated = device.lna_switch.toggleLNA()
+                self.displayInfo("LNA enabled!" if is_lna_activated else "LNA disabled!")
 
     def selectComponent(self, components_list, prompt):
-        unique_case_styles = sorted(set(component.case_style for component in components_list))
-        case_style_choice = self.whiptail_interface.menu(prompt, unique_case_styles)
-
-        if case_style_choice[BUTTONS_STATE] == CANCEL_BUTTON:
-            self.displayInfo(CONFIGURATION_CREATED_ABORTED)
+        unique_case_styles = sorted(set(component.case_style for component in components_list))   
+        selected_case_style = self.chooseItem(prompt, unique_case_styles, False, CONFIGURATION_CREATED_ABORTED)
+        
+        if not selected_case_style:
             return None
-
-        selected_case_style = case_style_choice[USER_CHOICE]
 
         available_model_numbers = [component.model_number for component in components_list if component.case_style == selected_case_style]
-        model_choice = self.whiptail_interface.menu(f"Available models for '{selected_case_style}' case:", available_model_numbers)
-
-        if model_choice[BUTTONS_STATE] == CANCEL_BUTTON:
-            self.displayInfo(CONFIGURATION_CREATED_ABORTED)
+        selected_model_number = self.chooseItem(f"Available models for '{selected_case_style}' case:", available_model_numbers, False, CONFIGURATION_CREATED_ABORTED)
+        
+        if not selected_model_number:
             return None
-
-        selected_model_number = model_choice[USER_CHOICE]
 
         for component in components_list:
             if (component.model_number == selected_model_number) and (component.case_style == selected_case_style):
                 return component
 
-    def createConfiguration(self, selected_board, filter_objects, amplifier_objects):
+    def createDeviceConfiguration(self, selected_board, filter_objects, amplifier_objects):
         device = Device(selected_board, self.log_filename)
 
         for i in range(device.DEVICE_TYPE_MAPPING[selected_board][0]):
@@ -195,4 +173,3 @@ class UserInterface:
             device.lna.append(selected_amplifier)
 
         return device
-
