@@ -58,29 +58,28 @@ class UserInterface:
         exit(0)
 
     def loadDeviceConfiguration(self):
-        while True:
-            configuration_files_list = [file for file in os.listdir(CONFIGS_DIR) if file.endswith(".pkl")]
+        if not os.path.exists(CONFIGS_DIR) or not any(file.endswith('.pkl') for file in os.listdir(CONFIGS_DIR)):
+            self.displayInfo(f"No configuration files found in the directory: {CONFIGS_DIR}"
+                                "\n\nPlease create a new device configuration!")
+            return None
 
-            if not configuration_files_list:
-                self.displayInfo(f"No configuration files found in the directory: {CONFIGS_DIR}"
-                                 "\n\nPlease create a new device configuration!")
-                return None
+        configuration_files_list = [file for file in os.listdir(CONFIGS_DIR) if file.endswith(".pkl")]
 
-            configuration_path = self.chooseItem(
-                "Select a configuration file:", configuration_files_list)
+        configuration_path = self.chooseItem(
+            "Select a configuration file:", configuration_files_list)
 
-            if not configuration_path:
-                return None
-            
-            with open(f"{CONFIGS_DIR}/{configuration_path}", 'rb') as device_configuration_file:
-                device = pickle.load(device_configuration_file)
+        if not configuration_path:
+            return None
+        
+        with open(f"{CONFIGS_DIR}/{configuration_path}", 'rb') as device_configuration_file:
+            device = pickle.load(device_configuration_file)
 
-            if self.logger:
-                self.logger.logMessage(f"Device configuration loaded: {CONFIGS_DIR}/{configuration_path}", Logger.LogLevel.INFO)
+        if self.logger:
+            self.logger.logMessage(f"Device configuration loaded: {CONFIGS_DIR}/{configuration_path}", Logger.LogLevel.INFO)
 
-            self.displayInfo("Configuration loaded succesfully!")
-            
-            return device
+        self.displayInfo("Configuration loaded succesfully!")
+        
+        return device
 
     def saveDeviceConfiguration(self, device):
         os.makedirs(CONFIGS_DIR, exist_ok=True)
