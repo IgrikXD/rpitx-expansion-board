@@ -1,8 +1,8 @@
 from colorama import Fore, Style
 from concurrent.futures import ThreadPoolExecutor
-from Device import *
-from UserInterface import *
-from Components import *
+from ControlApplication.Device import *
+from ControlApplication.UserInterface import *
+from ControlApplication.Components import *
 
 # Information related to the configuration of RF filter switches
 FILTER_MODELS_DIR = f"{APPLICATION_DIR}/FiltersList"
