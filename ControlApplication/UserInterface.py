@@ -54,7 +54,7 @@ class UserInterface:
         self.displayInfo(FAREWELL_MESSAGE)
         
         if self.logger:
-            self.logger.logMessage(f"Application stopped at: {datetime.datetime.now()}", Logger.LogLevel.INFO, True, True)
+            self.logger.logMessage(f"Application stopped!", Logger.LogLevel.INFO, True, True)
         exit(0)
 
     def loadDeviceConfiguration(self):
