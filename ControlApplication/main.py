@@ -34,7 +34,58 @@ APPLICATION_ACTIONS = ["Create a new device configuration", "Load device configu
 # -----------------------------------------------------------
 # Version 0.4: 
 # -----------------------------------------------------------
+# Adding the ability to install an application on the system
+# Added setup.py file containing information about the 
+# ControlApplication package and allowing you to install the 
+# application on the system using pipx. It is recommended to 
+# install application using pipx, in which case the application 
+# will be installed in an isolated environment and will not 
+# affect packages already installed on the system.
 # 
+# Handling the situation of missing CONFIGS_DIR directory
+# Now, if the CONFIGS_DIR directory does not exist, when you 
+# try to load the device configuration, an error message is 
+# displayed after which you return to the main application menu.
+# Previously, such an action would cause an exception and crash 
+# the application.
+# 
+# Avoiding the use of application startup arguments
+# Application startup arguments are no longer used as this 
+# approach is incompatible when using entry_points in setup.py. 
+# entry_points initiates the launch of a specific function 
+# specified in its parameters. With this launch model, sys.argv 
+# contains only the name of the script to be launched; any 
+# additional arguments passed are ignored!
+# 
+# Now, to enable debug mode (launch argument --show-debug-info), 
+# before installing the application, you need to run the following 
+# command, which will set the variable SHOW_DEBUG_INFO = True and 
+# activate debug mode:
+# sed -i 's/SHOW_DEBUG_INFO = False/SHOW_DEBUG_INFO = True/' ControlApplication/main.py
+# 
+# To use MockFactory to simulate GPIO ports (launch argument 
+# --use-mock-gpio), before installing the application you need to 
+# run a command that will set the variable IS_MOCK_GPIO_USED = True 
+# and enable GPIO ports simulation:
+# sed -i 's/IS_MOCK_GPIO_USED = False/IS_MOCK_GPIO_USED = True/' ControlApplication/main.py
+# 
+# The --help argument is no longer processed by any alternative 
+# methods.
+# 
+# Changing the module import process
+# Modules are now imported relative to the ControlApplication 
+# package name. This is necessary for the application to work 
+# correctly after installation.
+# 
+# Updating the main README.md file
+# Updating information about the application installation and 
+# uninstallation process.
+
+# Updating .gitignore
+# Excluding directories related to the application installation 
+# process.
+
+# Codebase refactoring
 # -----------------------------------------------------------
 # Version 0.3: 
 # -----------------------------------------------------------
