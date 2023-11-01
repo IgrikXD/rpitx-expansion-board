@@ -49,6 +49,18 @@ APPLICATION_ACTIONS = ["Create a new device configuration", "Load device configu
 # Previously, such an action would cause an exception and crash 
 # the application.
 # 
+# Changing the configuration creation process
+# Now, if you accidentally select an incorrect component case, 
+# you can go back a step by clicking the Cancel button and select 
+# the component case again. If you click the Cancel button in the 
+# component case selection menu, the creation of the device 
+# configuration will be aborted and you will be returned to the 
+# main menu.
+# Previously, when you clicked the Cancel button, regardless of 
+# whether you were selecting a component case or a specific 
+# component model, configuration creation was aborted and you 
+# were returned to the main menu.
+# 
 # Avoiding the use of application startup arguments
 # Application startup arguments are no longer used as this 
 # approach is incompatible when using entry_points in setup.py. 

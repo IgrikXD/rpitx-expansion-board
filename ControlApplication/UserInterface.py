@@ -138,21 +138,22 @@ class UserInterface:
                 self.displayInfo("LNA enabled!" if is_lna_activated else "LNA disabled!")
 
     def selectComponent(self, components_list, prompt):
-        unique_case_styles = sorted(set(component.case_style for component in components_list))   
-        selected_case_style = self.chooseItem(prompt, unique_case_styles, False, CONFIGURATION_CREATED_ABORTED)
-        
-        if not selected_case_style:
-            return None
+        while True:
+            unique_case_styles = sorted(set(component.case_style for component in components_list))   
+            selected_case_style = self.chooseItem(prompt, unique_case_styles, False, CONFIGURATION_CREATED_ABORTED)
+            
+            if not selected_case_style:
+                return None
 
-        available_model_numbers = [component.model_number for component in components_list if component.case_style == selected_case_style]
-        selected_model_number = self.chooseItem(f"Available models for '{selected_case_style}' case:", available_model_numbers, False, CONFIGURATION_CREATED_ABORTED)
-        
-        if not selected_model_number:
-            return None
+            available_model_numbers = [component.model_number for component in components_list if component.case_style == selected_case_style]
+            selected_model_number = self.chooseItem(f"Available models for '{selected_case_style}' case:", available_model_numbers, False)
+            
+            if not selected_model_number:
+                continue
 
-        for component in components_list:
-            if (component.model_number == selected_model_number) and (component.case_style == selected_case_style):
-                return component
+            for component in components_list:
+                if (component.model_number == selected_model_number) and (component.case_style == selected_case_style):
+                    return component
 
     def createDeviceConfiguration(self, selected_board, filter_objects, amplifier_objects):
         device = Device(selected_board, self.log_filename)
