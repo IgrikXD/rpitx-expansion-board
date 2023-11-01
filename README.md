@@ -1,6 +1,6 @@
 # rpitx-expansion-board
 
-Expansion board for **Raspberry Pi 4 Model B** that eliminates the need for a direct wired connection of radio equipment (such as antennas, amplifiers, switches, etc.) to GPIO when working with [rpitx][1] or [rpitx-ui][2] packages. Now, you can use coaxial SMA output, switchable filters, and built-in LNA.
+Expansion board for **Raspberry Pi 4 Model B** that eliminates the need for a direct wired connection of radio equipment (such as antennas, amplifiers, switches, etc.) to GPIO when working with [rpitx][1] or [rpitx-ui][2] packages. Now, you can use coaxial SMA output, switchable filters, and built-in LNA on one board!
 
 The expansion board is installed by connecting it to the 40-pin Raspberry Pi header and can be fixed additionally by connecting holes on the Raspberry Pi and the expansion board.
 
