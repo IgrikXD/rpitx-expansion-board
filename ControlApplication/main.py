@@ -3,7 +3,15 @@ from ControlApplication.Device import *
 from ControlApplication.UserInterface import *
 from ControlApplication.Components import *
 
+# Output debugging information to a file
 SHOW_DEBUG_INFO = True
+# Log file save location
+LOG_FILENAME = f"{APPLICATION_DIR}/DebugInfo.log" if SHOW_DEBUG_INFO else None
+
+# Using MockFactory to simulate real GPIO ports.This allows the 
+# application to run on devices other than RaspberryPi without 
+# causing a GPIO initialization error. Used for debugging and 
+# testing GPIO port states.
 IS_MOCK_GPIO_USED = True
 
 # Information related to the configuration of RF filter switches
@@ -17,9 +25,6 @@ AMPLIFIER_MODELS_DIR = f"{APPLICATION_DIR}/AmplifiersList"
 AMPLIFIER_DUMP_FILE = "AmplifierDump.pkl"
 LNA_INPUT_SWITCH_GPIO_PINS = [23, 24]
 LNA_OUTPUT_SWITCH_GPIO_PINS = [16, 26]
-
-# Log file save location
-LOG_FILENAME = f"{APPLICATION_DIR}/DebugInfo.log" if SHOW_DEBUG_INFO else None
 
 # List of actions available to perform for a specific device
 APPLICATION_ACTIONS = ["Create a new device configuration", "Load device configuration"]
