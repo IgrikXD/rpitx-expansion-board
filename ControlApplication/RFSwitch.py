@@ -45,8 +45,9 @@ class RFSwitch():
         else:
             self.logger = None
 
-        # Used BCM port numbering by default
         if use_mock_gpio:
+            # Use of MockFactory to simulate GPIO ports (used to run 
+            # and debug the application on non-Raspberry Pi devices)
             used_pin_factory = MockFactory()
 
             if self.logger:

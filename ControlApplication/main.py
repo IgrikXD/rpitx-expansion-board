@@ -13,6 +13,12 @@ LOG_FILENAME = f"{APPLICATION_DIR}/DebugInfo.log" if SHOW_DEBUG_INFO else None
 # causing a GPIO initialization error. Used for debugging and 
 # testing GPIO port states.
 IS_MOCK_GPIO_USED = True
+# Informational message about using GPIO port simulation
+MOCK_GPIO_USED_INFO = (
+    "Simulation of GPIO ports is used!\n\n"
+    "The state of the real GPIO ports will not change! "
+    "Disable this mode if you want to control the expansion board!"
+) if IS_MOCK_GPIO_USED else None
 
 # Information related to the configuration of RF filter switches
 FILTER_MODELS_DIR = f"{APPLICATION_DIR}/FiltersList"
@@ -158,6 +164,10 @@ APPLICATION_ACTIONS = ["Create a new device configuration", "Load device configu
 def main():
 
     user_interface = UserInterface(LOG_FILENAME)
+
+    # Displays an information message indicating that GPIO port simulation is being used
+    if IS_MOCK_GPIO_USED:
+        user_interface.displayInfo(MOCK_GPIO_USED_INFO)
 
     # Initializing available filter and amplifier models
     with ThreadPoolExecutor(max_workers=2) as executor:
