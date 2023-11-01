@@ -11,12 +11,12 @@ The expansion board is installed by connecting it to the 40-pin Raspberry Pi hea
 
 Before building and installing the control application, you can perform the following steps (not required if you plan to use the application normally):
 
-Enabling debugging mode (while the program is running, the log file APPLICATION_DIR/DebugInfo.log is created):
+Enabling **debugging mode** (while the program is running, the log file _APPLICATION_DIR/DebugInfo.log_ is created):
 ```sh
 sed -i 's/SHOW_DEBUG_INFO = False/SHOW_DEBUG_INFO = True/' ControlApplication/main.py
 ```
 
-Enabling the use of MockFactory to simulate GPIO ports (used to run and debug the application on non-Raspberry Pi devices):
+Enabling the **use of MockFactory to simulate GPIO ports** (used to run and debug the application on non-Raspberry Pi devices):
 ```sh
 sed -i 's/IS_MOCK_GPIO_USED = False/IS_MOCK_GPIO_USED = True/' ControlApplication/main.py
 ```
@@ -31,7 +31,7 @@ pipx install .
 rpitx-control
 ```
 
-Uninstalling the rpitx-control application:
+Uninstalling the **rpitx-control** application:
 ```sh
 pipx uninstall rpitx-control
 ```
