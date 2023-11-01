@@ -28,12 +28,10 @@ class UserInterface:
         
         if log_filename:
             self.logger = Logger(log_filename)
-        else:
-            self.logger = None
-        
-        if self.logger:
             self.displayInfo(f"Debug mode enabled!\n\nLogs will be writed to: {log_filename}")
             self.logger.logMessage(f"Application running!", Logger.LogLevel.INFO, True, True)
+        else:
+            self.logger = None
 
     def chooseItem(self, prompt, items, exit_if_cancel_pressed = False, cancel_message = None):
         user_action = self.whiptail_interface.menu(prompt, items)
