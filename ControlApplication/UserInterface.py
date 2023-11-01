@@ -26,7 +26,7 @@ class UserInterface:
         self.whiptail_interface = Whiptail(title=APPLICATION_TITLE)
         self.log_filename = log_filename
         
-        if ("--show-debug-info" in sys.argv) and log_filename:
+        if log_filename:
             self.logger = Logger(log_filename)
         else:
             self.logger = None

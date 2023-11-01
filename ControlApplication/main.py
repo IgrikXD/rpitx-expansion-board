@@ -1,8 +1,10 @@
-from colorama import Fore, Style
 from concurrent.futures import ThreadPoolExecutor
 from ControlApplication.Device import *
 from ControlApplication.UserInterface import *
 from ControlApplication.Components import *
+
+SHOW_DEBUG_INFO = True
+IS_MOCK_GPIO_USED = True
 
 # Information related to the configuration of RF filter switches
 FILTER_MODELS_DIR = f"{APPLICATION_DIR}/FiltersList"
@@ -17,12 +19,12 @@ LNA_INPUT_SWITCH_GPIO_PINS = [23, 24]
 LNA_OUTPUT_SWITCH_GPIO_PINS = [16, 26]
 
 # Log file save location
-LOG_FILENAME = f"{APPLICATION_DIR}/DebugInfo.log"
+LOG_FILENAME = f"{APPLICATION_DIR}/DebugInfo.log" if SHOW_DEBUG_INFO else None
 
 # List of actions available to perform for a specific device
 APPLICATION_ACTIONS = ["Create a new device configuration", "Load device configuration"]
 
-APP_VERISON = 0.3
+APP_VERISON = 0.4
 # -----------------------------------------------------------
 # Changelog:
 # -----------------------------------------------------------
@@ -82,24 +84,7 @@ APP_VERISON = 0.3
 # --scrolltext parameter
 # -----------------------------------------------------------
 
-
-def showHelpInfo(app_version, log_filename):
-    help_info = (
-        f"rpitx-control {app_version} - 2023 Ihar Yatsevich\n"
-        f"{Fore.YELLOW}Avaliable application arguments:{Style.RESET_ALL}\n"
-        f"{Fore.GREEN}--use-mock-gpio{Style.RESET_ALL}         Using MockFactory to simulate real GPIO ports.This allows the application " 
-        f"to run on devices other than RaspberryPi without causing a GPIO initialization error. Used for "
-        f"debugging and testing GPIO port states.\n"
-        f"{Fore.GREEN}--show-debug-info{Style.RESET_ALL}       Output debugging information to a file: {log_filename}"
-    )
-    print(help_info)
-
 def main():
-
-    # The program was launched with the --help argument. We display the help information and finish the work.
-    if ("--help" in sys.argv):
-        showHelpInfo(APP_VERISON, LOG_FILENAME)
-        exit(0)
 
     user_interface = UserInterface(LOG_FILENAME)
 
@@ -112,7 +97,8 @@ def main():
         amplifiers_list = amplifiers_future.result()
 
     while True:
-        user_action = user_interface.chooseItem("Choose an action:", APPLICATION_ACTIONS, True)
+        user_action = user_interface.chooseItem("Choose an action:", APPLICATION_ACTIONS, 
+                                                exit_if_cancel_pressed = True)
 
         # "Create a new device configuration" has been choosen
         if (user_action == APPLICATION_ACTIONS[0]):
@@ -133,10 +119,10 @@ def main():
                 continue
         
         # RF switches are initialized for all types of expansion boards
-        device.initFilterRFSwitches(FILTER_INPUT_SWITCH_GPIO_PINS, FILTER_OUTPUT_SWITCH_GPIO_PINS)
+        device.initFilterRFSwitches(FILTER_INPUT_SWITCH_GPIO_PINS, FILTER_OUTPUT_SWITCH_GPIO_PINS, IS_MOCK_GPIO_USED)
 
         # The LNA will only be initialized if the currently selected expansion board supports it
-        device.initLNA(LNA_INPUT_SWITCH_GPIO_PINS, LNA_OUTPUT_SWITCH_GPIO_PINS)
+        device.initLNA(LNA_INPUT_SWITCH_GPIO_PINS, LNA_OUTPUT_SWITCH_GPIO_PINS, IS_MOCK_GPIO_USED)
         
         # Displaying text information about the active device configuration
         user_interface.displayInfo(device.getConfigurationInfo())
