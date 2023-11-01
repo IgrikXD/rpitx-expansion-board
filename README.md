@@ -8,6 +8,20 @@ The expansion board is installed by connecting it to the 40-pin Raspberry Pi hea
 [![Progress](https://img.shields.io/badge/rpitx--expansion--board-not%20tested-red.svg?longCache=true&style=for-the-badge)](https://easyeda.com/IgrikXD/rpitx-expansion-board)&nbsp;[![Progress](https://img.shields.io/badge/app%20version-0.4-blue.svg?longCache=true&style=for-the-badge)](./ControlApplication)&nbsp;[![Progress](https://img.shields.io/badge/pcb%20version-0.0-blue.svg?longCache=true&style=for-the-badge)](./EasyEDA)
 
 ## Application usage:
+
+Before building and installing the control application, you can perform the following steps (not required if you plan to use the application normally):
+
+Enabling debugging mode (while the program is running, the log file APPLICATION_DIR/DebugInfo.log is created):
+```sh
+sed -i 's/SHOW_DEBUG_INFO = False/SHOW_DEBUG_INFO = True/' ControlApplication/main.py
+```
+
+Enabling the use of MockFactory to simulate GPIO ports (used to run and debug the application on non-Raspberry Pi devices):
+```sh
+sed -i 's/IS_MOCK_GPIO_USED = False/IS_MOCK_GPIO_USED = True/' ControlApplication/main.py
+```
+
+Installing and using **rpitx-control** application:
 ```sh
 sudo apt update
 git clone https://github.com/IgrikXD/rpitx-expansion-board
