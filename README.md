@@ -26,6 +26,7 @@ Installing and using **rpitx-control** application:
 sudo apt update && sudo apt install git pipx
 git clone https://github.com/IgrikXD/rpitx-expansion-board
 cd rpitx-expansion-board
+pipx ensurepath
 pipx install .
 rpitx-control
 ```
