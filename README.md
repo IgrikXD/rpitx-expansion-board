@@ -23,10 +23,10 @@ sed -i 's/IS_MOCK_GPIO_USED = False/IS_MOCK_GPIO_USED = True/' ControlApplicatio
 
 Installing and using **rpitx-control** application:
 ```sh
-sudo apt update
+sudo apt update && sudo apt install git pipx
 git clone https://github.com/IgrikXD/rpitx-expansion-board
 cd rpitx-expansion-board
-sudo pip install .
+pipx install .
 rpitx-control
 ```
 
