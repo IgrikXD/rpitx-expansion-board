@@ -29,9 +29,12 @@ LNA_OUTPUT_SWITCH_GPIO_PINS = [16, 26]
 # List of actions available to perform for a specific device
 APPLICATION_ACTIONS = ["Create a new device configuration", "Load device configuration"]
 
-APP_VERISON = 0.4
 # -----------------------------------------------------------
 # Changelog:
+# -----------------------------------------------------------
+# Version 0.4: 
+# -----------------------------------------------------------
+# 
 # -----------------------------------------------------------
 # Version 0.3: 
 # -----------------------------------------------------------
