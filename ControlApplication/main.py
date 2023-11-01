@@ -55,6 +55,14 @@ APPLICATION_ACTIONS = ["Create a new device configuration", "Load device configu
 # Previously, such an action would cause an exception and crash 
 # the application.
 # 
+# Displaying information about GPIO ports simulation mode
+# If IS_MOCK_GPIO_USED = True is set, when the application starts, 
+# an information message will be displayed stating that GPIO ports 
+# simulation is being used. The state of the actual GPIO ports 
+# will not be changed during application execution. This mode is 
+# used only for debugging the application on devices other than 
+# Raspberry Pi.
+    
 # Changing the configuration creation process
 # Now, if you accidentally select an incorrect component case, 
 # you can go back a step by clicking the Cancel button and select 
