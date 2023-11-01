@@ -12,7 +12,7 @@ The expansion board is installed by connecting it to the 40-pin Raspberry Pi hea
 sudo apt update
 git clone https://github.com/IgrikXD/rpitx-expansion-board
 cd rpitx-expansion-board
-pip install .
+sudo pip install .
 rpitx-control
 ```
 
