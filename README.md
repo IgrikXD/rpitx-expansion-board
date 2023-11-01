@@ -31,6 +31,11 @@ pipx install .
 rpitx-control
 ```
 
+Uninstalling the rpitx-control application:
+```sh
+pipx uninstall rpitx-control
+```
+
 ## Current available implementations at EasyEDA platform:
 ### Expansion boards without built-in LNA:
 - [rpitx-expansion-board-SP3T][6] - Expansion board with **3** switchable filters ([Components list](./ExpansionBoards/rpitx-expansion-board-SP3T/Components-list.md), [Assembly guide](./ExpansionBoards/rpitx-expansion-board-SP3T/Assembly-guide.md), [Usage guide](./ExpansionBoards/rpitx-expansion-board-SP3T/Usage-guide.md))
