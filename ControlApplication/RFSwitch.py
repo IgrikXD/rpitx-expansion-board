@@ -2,7 +2,7 @@ from concurrent.futures import ThreadPoolExecutor
 from gpiozero.pins.mock import MockFactory
 from gpiozero import OutputDevice
 from gpiozero import BadPinFactory
-from Logger import *
+from ControlApplication.Logger import *
 import sys
 
 # Aliases for high and low logic levels
@@ -38,15 +38,16 @@ class RFSwitch():
             6: (HIGH, LOW, HIGH),   #RF common to RF6
     }
 
-    def __init__(self, switch_pinout, switch_truth_table, log_filename = None):
+    def __init__(self, switch_pinout, switch_truth_table, use_mock_gpio = False, log_filename = None):
 
-        if ("--show-debug-info" in sys.argv) and log_filename:
+        if log_filename:
             self.logger = Logger(log_filename)
         else:
             self.logger = None
 
-        # Used BCM port numbering by default
-        if "--use-mock-gpio" in sys.argv:
+        if use_mock_gpio:
+            # Use of MockFactory to simulate GPIO ports (used to run 
+            # and debug the application on non-Raspberry Pi devices)
             used_pin_factory = MockFactory()
 
             if self.logger:
@@ -113,11 +114,11 @@ class RFSwitch():
             return True
 
 class RFSwitchWrapper():
-    def __init__(self, input_switch_pinout, output_switch_pinout, switch_truth_table, log_filename = None):
-        self.input_switch = RFSwitch(input_switch_pinout, switch_truth_table, log_filename)
-        self.output_switch = RFSwitch(output_switch_pinout, switch_truth_table, log_filename)
+    def __init__(self, input_switch_pinout, output_switch_pinout, switch_truth_table, use_mock_gpio = False, log_filename = None):
+        self.input_switch = RFSwitch(input_switch_pinout, switch_truth_table, use_mock_gpio, log_filename)
+        self.output_switch = RFSwitch(output_switch_pinout, switch_truth_table, use_mock_gpio, log_filename)
         
-        if ("--show-debug-info" in sys.argv) and log_filename:
+        if log_filename:
             self.logger = Logger(log_filename)
         else:
             self.logger = None
@@ -145,8 +146,8 @@ class FilterSwitch(RFSwitchWrapper):
     
 class LNASwitch(RFSwitchWrapper):
 
-    def __init__(self, input_switch_pinout, output_switch_pinout, switch_truth_table, log_filename):
-        super().__init__(input_switch_pinout, output_switch_pinout, switch_truth_table, log_filename)
+    def __init__(self, input_switch_pinout, output_switch_pinout, switch_truth_table, use_mock_gpio = False, log_filename = None):
+        super().__init__(input_switch_pinout, output_switch_pinout, switch_truth_table, use_mock_gpio, log_filename)
         self.is_active = False
 
     def toggleLNA(self):

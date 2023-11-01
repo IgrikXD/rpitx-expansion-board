@@ -1,20 +1,38 @@
 # rpitx-expansion-board
 
-Expansion board for **Raspberry Pi 4 Model B** that eliminates the need for a direct wired connection of radio equipment (such as antennas, amplifiers, switches, etc.) to GPIO when working with [rpitx][1] or [rpitx-ui][2] packages. Now, you can use coaxial SMA output, switchable filters, and built-in LNA.
+Expansion board for **Raspberry Pi 4 Model B** that eliminates the need for a direct wired connection of radio equipment (such as antennas, amplifiers, switches, etc.) to GPIO when working with [rpitx][1] or [rpitx-ui][2] packages. Now, you can use coaxial SMA output, switchable filters, and built-in LNA on one board!
 
 The expansion board is installed by connecting it to the 40-pin Raspberry Pi header and can be fixed additionally by connecting holes on the Raspberry Pi and the expansion board.
 
 ## Current development progress:
-[![Progress](https://img.shields.io/badge/rpitx--expansion--board-not%20tested-red.svg?longCache=true&style=for-the-badge)](https://easyeda.com/IgrikXD/rpitx-expansion-board)&nbsp;[![Progress](https://img.shields.io/badge/app%20version-0.3-blue.svg?longCache=true&style=for-the-badge)](./ControlApplication)&nbsp;[![Progress](https://img.shields.io/badge/pcb%20version-0.0-blue.svg?longCache=true&style=for-the-badge)](./EasyEDA)
+[![Progress](https://img.shields.io/badge/rpitx--expansion--board-not%20tested-red.svg?longCache=true&style=for-the-badge)](https://easyeda.com/IgrikXD/rpitx-expansion-board)&nbsp;[![Progress](https://img.shields.io/badge/app%20version-0.4-blue.svg?longCache=true&style=for-the-badge)](./ControlApplication)&nbsp;[![Progress](https://img.shields.io/badge/pcb%20version-0.0-blue.svg?longCache=true&style=for-the-badge)](./EasyEDA)
 
 ## Application usage:
+Installing and using **rpitx-control** application:
 ```sh
-sudo apt update
+sudo apt update && sudo apt install git pipx
 git clone https://github.com/IgrikXD/rpitx-expansion-board
-pip install colorama gpiozero pickle pandas whiptail
-pip install git+https://github.com/IgrikXD/whiptail-dialogs@master
 cd rpitx-expansion-board
-python3 ./ControlApplication/main.py
+pipx ensurepath
+pipx install .
+rpitx-control
+```
+
+Before building and installing the control application, you can perform the following steps (not required if you plan to use the application normally):
+
+Enabling **debugging mode** (while the program is running, the log file _APPLICATION_DIR/DebugInfo.log_ is created):
+```sh
+sed -i 's/SHOW_DEBUG_INFO = False/SHOW_DEBUG_INFO = True/' ControlApplication/main.py
+```
+
+Enabling the **use of MockFactory to simulate GPIO ports** (used to run and debug the application on non-Raspberry Pi devices):
+```sh
+sed -i 's/IS_MOCK_GPIO_USED = False/IS_MOCK_GPIO_USED = True/' ControlApplication/main.py
+```
+
+Uninstalling the **rpitx-control** application:
+```sh
+pipx uninstall rpitx-control
 ```
 
 ## Current available implementations at EasyEDA platform:

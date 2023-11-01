@@ -2,3 +2,6 @@ __pycache__
 SavedConfiguration
 *.pkl
 *.log
+build
+dist
+*egg-info

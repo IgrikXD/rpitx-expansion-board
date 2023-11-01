@@ -1,7 +1,7 @@
 import os
 import pickle
-from Device import *
-from Logger import *
+from ControlApplication.Device import *
+from ControlApplication.Logger import *
 from whiptail import Whiptail
 
 # Which button was pressed?
@@ -26,14 +26,12 @@ class UserInterface:
         self.whiptail_interface = Whiptail(title=APPLICATION_TITLE)
         self.log_filename = log_filename
         
-        if ("--show-debug-info" in sys.argv) and log_filename:
+        if log_filename:
             self.logger = Logger(log_filename)
-        else:
-            self.logger = None
-        
-        if self.logger:
             self.displayInfo(f"Debug mode enabled!\n\nLogs will be writed to: {log_filename}")
             self.logger.logMessage(f"Application running!", Logger.LogLevel.INFO, True, True)
+        else:
+            self.logger = None
 
     def chooseItem(self, prompt, items, exit_if_cancel_pressed = False, cancel_message = None):
         user_action = self.whiptail_interface.menu(prompt, items)
@@ -58,29 +56,28 @@ class UserInterface:
         exit(0)
 
     def loadDeviceConfiguration(self):
-        while True:
-            configuration_files_list = [file for file in os.listdir(CONFIGS_DIR) if file.endswith(".pkl")]
+        if not os.path.exists(CONFIGS_DIR) or not any(file.endswith('.pkl') for file in os.listdir(CONFIGS_DIR)):
+            self.displayInfo(f"No configuration files found in the directory: {CONFIGS_DIR}"
+                                "\n\nPlease create a new device configuration!")
+            return None
 
-            if not configuration_files_list:
-                self.displayInfo(f"No configuration files found in the directory: {CONFIGS_DIR}"
-                                 "\n\nPlease create a new device configuration!")
-                return None
+        configuration_files_list = [file for file in os.listdir(CONFIGS_DIR) if file.endswith(".pkl")]
 
-            configuration_path = self.chooseItem(
-                "Select a configuration file:", configuration_files_list)
+        configuration_path = self.chooseItem(
+            "Select a configuration file:", configuration_files_list)
 
-            if not configuration_path:
-                return None
-            
-            with open(f"{CONFIGS_DIR}/{configuration_path}", 'rb') as device_configuration_file:
-                device = pickle.load(device_configuration_file)
+        if not configuration_path:
+            return None
+        
+        with open(f"{CONFIGS_DIR}/{configuration_path}", 'rb') as device_configuration_file:
+            device = pickle.load(device_configuration_file)
 
-            if self.logger:
-                self.logger.logMessage(f"Device configuration loaded: {CONFIGS_DIR}/{configuration_path}", Logger.LogLevel.INFO)
+        if self.logger:
+            self.logger.logMessage(f"Device configuration loaded: {CONFIGS_DIR}/{configuration_path}", Logger.LogLevel.INFO)
 
-            self.displayInfo("Configuration loaded succesfully!")
-            
-            return device
+        self.displayInfo("Configuration loaded succesfully!")
+        
+        return device
 
     def saveDeviceConfiguration(self, device):
         os.makedirs(CONFIGS_DIR, exist_ok=True)
@@ -141,21 +138,22 @@ class UserInterface:
                 self.displayInfo("LNA enabled!" if is_lna_activated else "LNA disabled!")
 
     def selectComponent(self, components_list, prompt):
-        unique_case_styles = sorted(set(component.case_style for component in components_list))   
-        selected_case_style = self.chooseItem(prompt, unique_case_styles, False, CONFIGURATION_CREATED_ABORTED)
-        
-        if not selected_case_style:
-            return None
+        while True:
+            unique_case_styles = sorted(set(component.case_style for component in components_list))   
+            selected_case_style = self.chooseItem(prompt, unique_case_styles, False, CONFIGURATION_CREATED_ABORTED)
+            
+            if not selected_case_style:
+                return None
 
-        available_model_numbers = [component.model_number for component in components_list if component.case_style == selected_case_style]
-        selected_model_number = self.chooseItem(f"Available models for '{selected_case_style}' case:", available_model_numbers, False, CONFIGURATION_CREATED_ABORTED)
-        
-        if not selected_model_number:
-            return None
+            available_model_numbers = [component.model_number for component in components_list if component.case_style == selected_case_style]
+            selected_model_number = self.chooseItem(f"Available models for '{selected_case_style}' case:", available_model_numbers, False)
+            
+            if not selected_model_number:
+                continue
 
-        for component in components_list:
-            if (component.model_number == selected_model_number) and (component.case_style == selected_case_style):
-                return component
+            for component in components_list:
+                if (component.model_number == selected_model_number) and (component.case_style == selected_case_style):
+                    return component
 
     def createDeviceConfiguration(self, selected_board, filter_objects, amplifier_objects):
         device = Device(selected_board, self.log_filename)

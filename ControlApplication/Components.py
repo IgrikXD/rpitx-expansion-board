@@ -4,7 +4,7 @@ import pickle
 import sys
 from colorama import Fore, Style
 from concurrent.futures import ThreadPoolExecutor
-from Logger import *
+from ControlApplication.Logger import *
 
 class BaseModel:
     def __init__(self, model_number, case_style, description):
@@ -35,7 +35,7 @@ class ComponentsList:
 
     def __init__(self, model_type, models_dir, dump_filename, log_filename = None):
         self.model_type = model_type
-        if ("--show-debug-info" in sys.argv) and log_filename:
+        if log_filename:
             self.logger = Logger(log_filename)
         else:
             self.logger = None

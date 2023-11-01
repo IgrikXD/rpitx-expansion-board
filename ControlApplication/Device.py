@@ -1,4 +1,4 @@
-from RFSwitch import * 
+from ControlApplication.RFSwitch import * 
 
 class Device:
     # List of available device for operation
@@ -35,17 +35,17 @@ class Device:
         self.lna_switch = None
         self.log_filename = log_filename
 
-    def initFilterRFSwitches(self, input_switch_pinout, output_switch_pinout):
+    def initFilterRFSwitches(self, input_switch_pinout, output_switch_pinout, use_mock_gpio = False):
         if self.filter_switch is None:
             self.filter_switch = FilterSwitch(input_switch_pinout, output_switch_pinout, 
                                               Device.DEVICE_TYPE_MAPPING[self.model_name][self.FILTERS_SWITCH_TRUTH_TABLE], 
-                                              self.log_filename)
+                                              use_mock_gpio, self.log_filename)
 
-    def initLNA(self, input_switch_pinout, output_switch_pinout):
+    def initLNA(self, input_switch_pinout, output_switch_pinout, use_mock_gpio = False):
         switch_truth_table = Device.DEVICE_TYPE_MAPPING[self.model_name][self.LNA_SWITCH_TRUTH_TABLE]
         if switch_truth_table and self.lna_switch is None:
             self.lna_switch = LNASwitch(input_switch_pinout, output_switch_pinout, 
-                                        switch_truth_table, 
+                                        switch_truth_table, use_mock_gpio,
                                         self.log_filename)
 
     def getConfigurationInfo(self):
