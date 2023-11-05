@@ -52,8 +52,7 @@ def main():
         amplifiers_list = amplifiers_future.result()
 
     while True:
-        user_action = user_interface.chooseItem("Choose an action:", APPLICATION_ACTIONS, 
-                                                exit_if_cancel_pressed = True)
+        user_action = user_interface.chooseItem("Choose an action:", APPLICATION_ACTIONS, True)
 
         # "Create a new device configuration" has been choosen
         if (user_action == APPLICATION_ACTIONS[0]):

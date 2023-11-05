@@ -34,12 +34,10 @@ class UserInterface:
         else:
             self.logger = None
 
-    def chooseItem(self, prompt, items, exit_if_cancel_pressed = False, cancel_message = None):
+    def chooseItem(self, prompt, items, exit_if_cancel_pressed = False):
         user_action = self.whiptail_interface.menu(prompt, items)
         # <Cancel> button has been pressed
         if (user_action[BUTTONS_STATE] == CANCEL_BUTTON):
-            if cancel_message:
-                self.displayInfo(cancel_message)
             if exit_if_cancel_pressed:
                 self.displayFarewellMessageAndExit()
             return None
@@ -147,12 +145,15 @@ class UserInterface:
             if may_be_not_installed:
                 unique_case_styles.insert(0, NOT_INSTALLED_ITEM)
             
-            selected_case_style = self.chooseItem(prompt, unique_case_styles, False, CONFIGURATION_CREATED_ABORTED)
+            selected_case_style = self.chooseItem(prompt, unique_case_styles, False)
             
             if not selected_case_style:
+                # The user pressed <Cancel>, we display info message and return to the initial menu
+                self.displayInfo(CONFIGURATION_CREATED_ABORTED)
                 return None
-            
+
             if selected_case_style == NOT_INSTALLED_ITEM:
+                # The user pressed <Not installed>
                 # We note that the component is not installed on the expansion board
                 return BaseModel(None, None, None)
 
@@ -160,6 +161,7 @@ class UserInterface:
             selected_model_number = self.chooseItem(f"Available models for '{selected_case_style}' case:", available_model_numbers, False)
             
             if not selected_model_number:
+                # The user clicked <Cancel>, we suggest selecting the case type again
                 continue
 
             for component in components_list:
@@ -186,6 +188,7 @@ class UserInterface:
 
         # We check that there is information about at least one filter installed on the board
         if self.__noValidComponents(device.filters):
+            # The user has not selected any filters and returns to the start menu, we have nothing to switch
             self.displayInfo("No information about the filters used! "
                              "Create a new configuration or load an existing one!")
             return None
