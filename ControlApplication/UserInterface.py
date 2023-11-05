@@ -98,10 +98,6 @@ class UserInterface:
                         for i, filter_obj in enumerate(device.filters) 
                         if filter_obj.model_number != None]
 
-        # No installed filters were selected during configuration creation
-        if not actions_list:
-            return None
-
         if device.lna_switch is not None:
             lna = device.lna[0]
             actions_list.append((f"Toggle LNA state", f"{lna.model_number}, {lna.description}, {lna.f_low} - {lna.f_high} MHz"))
@@ -120,11 +116,6 @@ class UserInterface:
     def chooseBoardAction(self, device):
 
         ACTIONS_LIST = self.createActionsList(device)
-
-        if not ACTIONS_LIST:
-            self.displayInfo("No information about the filters used! "
-                             "Create a new configuration or load an existing one!")
-            return
         
         active_filter = "Not selected!"
         is_lna_activated = False
@@ -174,6 +165,13 @@ class UserInterface:
                 if (component.model_number == selected_model_number) and (component.case_style == selected_case_style):
                     return component
 
+    def __noValidFilters(self, device_filters):
+        for filter in device_filters:
+            if filter.model_number is not None:
+                return False
+        
+        return True
+
     def createDeviceConfiguration(self, selected_board, filter_objects, amplifier_objects):
         device = Device(selected_board, self.log_filename)
 
@@ -182,6 +180,11 @@ class UserInterface:
             if selected_filter is None:
                 return None
             device.filters.append(selected_filter)
+
+        if self.__noValidFilters(device.filters):
+            self.displayInfo("No information about the filters used! "
+                             "Create a new configuration or load an existing one!")
+            return None
 
         if "LNA" in selected_board:
             selected_amplifier = self.selectComponent(amplifier_objects, "Choose amplifier case:")
