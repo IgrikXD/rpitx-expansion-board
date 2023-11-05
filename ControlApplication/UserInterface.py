@@ -1,5 +1,6 @@
 import os
 import pickle
+from ControlApplication.Components import *
 from ControlApplication.Device import *
 from ControlApplication.Logger import *
 from whiptail import Whiptail
@@ -33,12 +34,10 @@ class UserInterface:
         else:
             self.logger = None
 
-    def chooseItem(self, prompt, items, exit_if_cancel_pressed = False, cancel_message = None):
+    def chooseItem(self, prompt, items, exit_if_cancel_pressed = False):
         user_action = self.whiptail_interface.menu(prompt, items)
         # <Cancel> button has been pressed
         if (user_action[BUTTONS_STATE] == CANCEL_BUTTON):
-            if cancel_message:
-                self.displayInfo(cancel_message)
             if exit_if_cancel_pressed:
                 self.displayFarewellMessageAndExit()
             return None
@@ -92,18 +91,20 @@ class UserInterface:
         
         self.displayInfo(f"Configuration saved!\n\nFile: {file_path}")
 
-    def createActionsList(self, device):
+    def __createActionsList(self, device):
         actions_list = [(f"Activate filter {i + 1}", f"{filter_obj.model_number}, {filter_obj.description}") 
-                    for i, filter_obj in enumerate(device.filters)]
-        
+                        for i, filter_obj in enumerate(device.filters) 
+                        if filter_obj.model_number != None]
+
         if device.lna_switch is not None:
             lna = device.lna[0]
             actions_list.append((f"Toggle LNA state", f"{lna.model_number}, {lna.description}, {lna.f_low} - {lna.f_high} MHz"))
         
         return actions_list
 
-    def updateBoardInfo(self, active_filter, is_lna_activated, device):
-        board_status = f"Active filter: {active_filter}\n"
+    def __updateBoardInfo(self, active_filter, is_lna_activated, device):
+        board_status = f"Device type: {device.model_name}\n"
+        board_status += f"Active filter: {active_filter}\n"
         
         if device.lna_switch is not None:
             board_status += f"Is LNA active: {is_lna_activated}!\n"
@@ -113,14 +114,14 @@ class UserInterface:
 
     def chooseBoardAction(self, device):
 
-        ACTIONS_LIST = self.createActionsList(device)
+        ACTIONS_LIST = self.__createActionsList(device)
         
         active_filter = "Not selected!"
         is_lna_activated = False
 
         while True:
             
-            board_status = self.updateBoardInfo(active_filter, is_lna_activated, device)
+            board_status = self.__updateBoardInfo(active_filter, is_lna_activated, device)
             user_choice = self.chooseItem(board_status, ACTIONS_LIST, True)
 
             if "Activate filter" in user_choice:
@@ -137,33 +138,63 @@ class UserInterface:
                 is_lna_activated = device.lna_switch.toggleLNA()
                 self.displayInfo("LNA enabled!" if is_lna_activated else "LNA disabled!")
 
-    def selectComponent(self, components_list, prompt):
+    def selectComponent(self, components_list, prompt, may_be_not_installed = False):
         while True:
-            unique_case_styles = sorted(set(component.case_style for component in components_list))   
-            selected_case_style = self.chooseItem(prompt, unique_case_styles, False, CONFIGURATION_CREATED_ABORTED)
+            unique_case_styles = sorted(set(component.case_style for component in components_list))
+            
+            NOT_INSTALLED_ITEM = "<Not installed>"
+            if may_be_not_installed:
+                unique_case_styles.insert(0, NOT_INSTALLED_ITEM)
+            
+            selected_case_style = self.chooseItem(prompt, unique_case_styles, False)
             
             if not selected_case_style:
+                # The user pressed <Cancel>, we display info message and return to the initial menu
+                self.displayInfo(CONFIGURATION_CREATED_ABORTED)
                 return None
+
+            if selected_case_style == NOT_INSTALLED_ITEM:
+                # The user pressed <Not installed>
+                # We note that the component is not installed on the expansion board
+                return BaseModel(None, None, None)
 
             available_model_numbers = [component.model_number for component in components_list if component.case_style == selected_case_style]
             selected_model_number = self.chooseItem(f"Available models for '{selected_case_style}' case:", available_model_numbers, False)
             
             if not selected_model_number:
+                # The user clicked <Cancel>, we suggest selecting the case type again
                 continue
 
             for component in components_list:
                 if (component.model_number == selected_model_number) and (component.case_style == selected_case_style):
                     return component
 
+    def __noValidComponents(self, device_filters):
+        for filter in device_filters:
+            # If there is information on at least one component - return False
+            if filter.model_number is not None:
+                return False
+        
+        return True
+
     def createDeviceConfiguration(self, selected_board, filter_objects, amplifier_objects):
         device = Device(selected_board, self.log_filename)
 
+        # Fill in information about the filters used
         for i in range(device.DEVICE_TYPE_MAPPING[selected_board][0]):
-            selected_filter = self.selectComponent(filter_objects, f"Choose filter case for filter {i + 1} from {device.DEVICE_TYPE_MAPPING[selected_board][0]}:")
+            selected_filter = self.selectComponent(filter_objects, f"Choose filter case for filter {i + 1} from {device.DEVICE_TYPE_MAPPING[selected_board][0]}:", True)
             if selected_filter is None:
                 return None
             device.filters.append(selected_filter)
 
+        # We check that there is information about at least one filter installed on the board
+        if self.__noValidComponents(device.filters):
+            # The user has not selected any filters and returns to the start menu, we have nothing to switch
+            self.displayInfo("No information about the filters used! "
+                             "Create a new configuration or load an existing one!")
+            return None
+
+        # If the expansion board supports built-in LNA, select the LNA used
         if "LNA" in selected_board:
             selected_amplifier = self.selectComponent(amplifier_objects, "Choose amplifier case:")
             if selected_amplifier is None:
