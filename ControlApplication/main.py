@@ -38,6 +38,23 @@ APPLICATION_ACTIONS = ["Create a new device configuration", "Load device configu
 # -----------------------------------------------------------
 # Changelog:
 # -----------------------------------------------------------
+# Version 0.5: 
+# -----------------------------------------------------------
+# Handling the situation when the filter is not installed
+# Now, you can tell the program that the filter is not installed 
+# on the PCB. What is it for? For example, you are using the 
+# rpitx-expansion-board-SP6T board but have soldered only 3 
+# filters out of 6 since you simply do not need the remaining 
+# filters - to highlight that the filters are not installed on 
+# the PCB, you can select the "NOT INSTALLED" item when selecting 
+# the case type for a specific filter. In this case, the RF 
+# path for this filter will be excluded from the activation 
+# list, and in the main menu of the application, you will see 
+# only those filters that are available for activation.
+# The changes also affected the display of information about 
+# the active expansion board. Now, if the filter is not installed, 
+# you will see the corresponding information.
+# -----------------------------------------------------------
 # Version 0.4: 
 # -----------------------------------------------------------
 # Adding the ability to install an application on the system
