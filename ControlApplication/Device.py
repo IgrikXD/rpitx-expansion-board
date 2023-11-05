@@ -70,18 +70,22 @@ class Device:
         configuration_info += delimiter
 
         for i, filter_obj in enumerate(self.filters, start=1):
-            filter_info = (
-                f"\nFilter {i}:\n"
-                f"Model Number: {filter_obj.model_number}\n"
-                f"Case Style: {filter_obj.case_style}\n"
-                f"Description: {filter_obj.description}\n"
-                f"Filter Type: {filter_obj.filter_type}\n"
-                f"Passband F1: {filter_obj.passband_f1} MHz\n"
-                f"Passband F2: {filter_obj.passband_f2} MHz\n"
-                f"Stopband F3: {filter_obj.stopband_f3} MHz\n"
-                f"Stopband F4: {filter_obj.stopband_f4} MHz\n"
-                f"{delimiter}"
-            )
-            configuration_info += filter_info
+            if filter_obj.model_number == None:
+                filter_info = (
+                    f"\nFilter {i}: Not installed!\n"
+                )
+            else:
+                filter_info = (
+                    f"\nFilter {i}:\n"
+                    f"Model Number: {filter_obj.model_number}\n"
+                    f"Case Style: {filter_obj.case_style}\n"
+                    f"Description: {filter_obj.description}\n"
+                    f"Filter Type: {filter_obj.filter_type}\n"
+                    f"Passband F1: {filter_obj.passband_f1} MHz\n"
+                    f"Passband F2: {filter_obj.passband_f2} MHz\n"
+                    f"Stopband F3: {filter_obj.stopband_f3} MHz\n"
+                    f"Stopband F4: {filter_obj.stopband_f4} MHz\n"
+                )
+            configuration_info += f"{filter_info}{delimiter}"
 
         return configuration_info

@@ -1,5 +1,6 @@
 import os
 import pickle
+from ControlApplication.Components import *
 from ControlApplication.Device import *
 from ControlApplication.Logger import *
 from whiptail import Whiptail
@@ -94,7 +95,8 @@ class UserInterface:
 
     def createActionsList(self, device):
         actions_list = [(f"Activate filter {i + 1}", f"{filter_obj.model_number}, {filter_obj.description}") 
-                    for i, filter_obj in enumerate(device.filters)]
+                        for i, filter_obj in enumerate(device.filters) 
+                        if filter_obj.model_number != None]
         
         if device.lna_switch is not None:
             lna = device.lna[0]
@@ -137,13 +139,20 @@ class UserInterface:
                 is_lna_activated = device.lna_switch.toggleLNA()
                 self.displayInfo("LNA enabled!" if is_lna_activated else "LNA disabled!")
 
-    def selectComponent(self, components_list, prompt):
+    def selectComponent(self, components_list, prompt, may_be_empty = False):
         while True:
-            unique_case_styles = sorted(set(component.case_style for component in components_list))   
+            unique_case_styles = sorted(set(component.case_style for component in components_list))
+            
+            if may_be_empty:
+                unique_case_styles.insert(0, 'NOT INSTALLED')
+            
             selected_case_style = self.chooseItem(prompt, unique_case_styles, False, CONFIGURATION_CREATED_ABORTED)
             
             if not selected_case_style:
                 return None
+            
+            if selected_case_style == "NOT INSTALLED":
+                return BaseModel(None, None, None)
 
             available_model_numbers = [component.model_number for component in components_list if component.case_style == selected_case_style]
             selected_model_number = self.chooseItem(f"Available models for '{selected_case_style}' case:", available_model_numbers, False)
@@ -159,7 +168,7 @@ class UserInterface:
         device = Device(selected_board, self.log_filename)
 
         for i in range(device.DEVICE_TYPE_MAPPING[selected_board][0]):
-            selected_filter = self.selectComponent(filter_objects, f"Choose filter case for filter {i + 1} from {device.DEVICE_TYPE_MAPPING[selected_board][0]}:")
+            selected_filter = self.selectComponent(filter_objects, f"Choose filter case for filter {i + 1} from {device.DEVICE_TYPE_MAPPING[selected_board][0]}:", True)
             if selected_filter is None:
                 return None
             device.filters.append(selected_filter)
