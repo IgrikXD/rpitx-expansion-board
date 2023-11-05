@@ -20,6 +20,7 @@ CONFIGS_DIR = f"{APPLICATION_DIR}/SavedConfiguration/"
 APPLICATION_TITLE = "rpitx-expansion-board control application"
 FAREWELL_MESSAGE = "Thanks for using rpitx-expansion-board project!"
 CONFIGURATION_CREATED_ABORTED = "Configuration creation aborted!"
+NOT_INSTALLED_ITEM = "<Not installed>"
 
 class UserInterface:
 
@@ -144,14 +145,14 @@ class UserInterface:
             unique_case_styles = sorted(set(component.case_style for component in components_list))
             
             if may_be_not_installed:
-                unique_case_styles.insert(0, 'NOT INSTALLED')
+                unique_case_styles.insert(0, NOT_INSTALLED_ITEM)
             
             selected_case_style = self.chooseItem(prompt, unique_case_styles, False, CONFIGURATION_CREATED_ABORTED)
             
             if not selected_case_style:
                 return None
             
-            if selected_case_style == "NOT INSTALLED":
+            if selected_case_style == NOT_INSTALLED_ITEM:
                 return BaseModel(None, None, None)
 
             available_model_numbers = [component.model_number for component in components_list if component.case_style == selected_case_style]
