@@ -122,7 +122,7 @@ class UserInterface:
         ACTIONS_LIST = self.createActionsList(device)
 
         if not ACTIONS_LIST:
-            self.displayInfo("You haven't selected any filters! "
+            self.displayInfo("No information about the filters used! "
                              "Create a new configuration or load an existing one!")
             return
         
