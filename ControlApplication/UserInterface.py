@@ -103,7 +103,8 @@ class UserInterface:
         return actions_list
 
     def __updateBoardInfo(self, active_filter, is_lna_activated, device):
-        board_status = f"Active filter: {active_filter}\n"
+        board_status = f"Device type: {device.model_name}\n"
+        board_status += f"Active filter: {active_filter}\n"
         
         if device.lna_switch is not None:
             board_status += f"Is LNA active: {is_lna_activated}!\n"
