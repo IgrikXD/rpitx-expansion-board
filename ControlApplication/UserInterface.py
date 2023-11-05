@@ -153,6 +153,7 @@ class UserInterface:
                 return None
             
             if selected_case_style == NOT_INSTALLED_ITEM:
+                # We note that the component is not installed on the expansion board
                 return BaseModel(None, None, None)
 
             available_model_numbers = [component.model_number for component in components_list if component.case_style == selected_case_style]
@@ -165,8 +166,9 @@ class UserInterface:
                 if (component.model_number == selected_model_number) and (component.case_style == selected_case_style):
                     return component
 
-    def __noValidFilters(self, device_filters):
+    def __noValidComponents(self, device_filters):
         for filter in device_filters:
+            # If there is information on at least one component - return False
             if filter.model_number is not None:
                 return False
         
@@ -175,6 +177,7 @@ class UserInterface:
     def createDeviceConfiguration(self, selected_board, filter_objects, amplifier_objects):
         device = Device(selected_board, self.log_filename)
 
+        # Fill in information about the filters used
         for i in range(device.DEVICE_TYPE_MAPPING[selected_board][0]):
             selected_filter = self.__selectComponent(filter_objects, f"Choose filter case for filter {i + 1} from {device.DEVICE_TYPE_MAPPING[selected_board][0]}:", True)
             if selected_filter is None:
@@ -182,11 +185,12 @@ class UserInterface:
             device.filters.append(selected_filter)
 
         # We check that there is information about at least one filter installed on the board
-        if self.__noValidFilters(device.filters):
+        if self.__noValidComponents(device.filters):
             self.displayInfo("No information about the filters used! "
                              "Create a new configuration or load an existing one!")
             return None
 
+        # If the expansion board supports built-in LNA, select the LNA used
         if "LNA" in selected_board:
             selected_amplifier = self.__selectComponent(amplifier_objects, "Choose amplifier case:")
             if selected_amplifier is None:
