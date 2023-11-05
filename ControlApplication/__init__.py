@@ -17,6 +17,8 @@
 # The changes also affected the display of information about 
 # the active expansion board. Now, if the filter is not installed, 
 # you will see the corresponding information.
+# 
+# The changelog has been moved to the __init__.py file
 # -----------------------------------------------------------
 # Version 0.4: 
 # -----------------------------------------------------------
