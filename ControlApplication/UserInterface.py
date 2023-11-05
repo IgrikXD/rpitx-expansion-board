@@ -139,11 +139,11 @@ class UserInterface:
                 is_lna_activated = device.lna_switch.toggleLNA()
                 self.displayInfo("LNA enabled!" if is_lna_activated else "LNA disabled!")
 
-    def selectComponent(self, components_list, prompt, may_be_empty = False):
+    def selectComponent(self, components_list, prompt, may_be_not_installed = False):
         while True:
             unique_case_styles = sorted(set(component.case_style for component in components_list))
             
-            if may_be_empty:
+            if may_be_not_installed:
                 unique_case_styles.insert(0, 'NOT INSTALLED')
             
             selected_case_style = self.chooseItem(prompt, unique_case_styles, False, CONFIGURATION_CREATED_ABORTED)
