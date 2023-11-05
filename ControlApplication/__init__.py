@@ -26,6 +26,11 @@
 # active expansion board. Now, if the filter is not installed, you 
 # will see the corresponding information.
 # 
+# Added information about the current expansion board in the main 
+# menu of the application.
+# The information is displayed in the first line in the menu for 
+# selecting control actions.
+# 
 # The changelog has been moved to the __init__.py file
 # 
 # Codebase refactoring
