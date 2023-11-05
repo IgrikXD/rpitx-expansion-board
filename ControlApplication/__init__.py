@@ -17,6 +17,10 @@
 # The changes also affected the display of information about 
 # the active expansion board. Now, if the filter is not installed, 
 # you will see the corresponding information.
+# If you do not select at least one filter that is installed on 
+# the expansion board, an appropriate error will be displayed, 
+# and you will be returned to the initial menu where you can 
+# either create a new or load an existing device configuration.
 # 
 # The changelog has been moved to the __init__.py file
 # -----------------------------------------------------------
