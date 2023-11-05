@@ -97,7 +97,11 @@ class UserInterface:
         actions_list = [(f"Activate filter {i + 1}", f"{filter_obj.model_number}, {filter_obj.description}") 
                         for i, filter_obj in enumerate(device.filters) 
                         if filter_obj.model_number != None]
-        
+
+        # No installed filters were selected during configuration creation
+        if not actions_list:
+            return None
+
         if device.lna_switch is not None:
             lna = device.lna[0]
             actions_list.append((f"Toggle LNA state", f"{lna.model_number}, {lna.description}, {lna.f_low} - {lna.f_high} MHz"))
@@ -116,6 +120,11 @@ class UserInterface:
     def chooseBoardAction(self, device):
 
         ACTIONS_LIST = self.createActionsList(device)
+
+        if not ACTIONS_LIST:
+            self.displayInfo("You haven't selected any filters! "
+                             "Create a new configuration or load an existing one!")
+            return
         
         active_filter = "Not selected!"
         is_lna_activated = False
