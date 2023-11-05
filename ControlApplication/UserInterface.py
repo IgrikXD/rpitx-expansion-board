@@ -93,7 +93,7 @@ class UserInterface:
         
         self.displayInfo(f"Configuration saved!\n\nFile: {file_path}")
 
-    def createActionsList(self, device):
+    def __createActionsList(self, device):
         actions_list = [(f"Activate filter {i + 1}", f"{filter_obj.model_number}, {filter_obj.description}") 
                         for i, filter_obj in enumerate(device.filters) 
                         if filter_obj.model_number != None]
@@ -104,7 +104,7 @@ class UserInterface:
         
         return actions_list
 
-    def updateBoardInfo(self, active_filter, is_lna_activated, device):
+    def __updateBoardInfo(self, active_filter, is_lna_activated, device):
         board_status = f"Active filter: {active_filter}\n"
         
         if device.lna_switch is not None:
@@ -115,14 +115,14 @@ class UserInterface:
 
     def chooseBoardAction(self, device):
 
-        ACTIONS_LIST = self.createActionsList(device)
+        ACTIONS_LIST = self.__createActionsList(device)
         
         active_filter = "Not selected!"
         is_lna_activated = False
 
         while True:
             
-            board_status = self.updateBoardInfo(active_filter, is_lna_activated, device)
+            board_status = self.__updateBoardInfo(active_filter, is_lna_activated, device)
             user_choice = self.chooseItem(board_status, ACTIONS_LIST, True)
 
             if "Activate filter" in user_choice:
@@ -139,7 +139,7 @@ class UserInterface:
                 is_lna_activated = device.lna_switch.toggleLNA()
                 self.displayInfo("LNA enabled!" if is_lna_activated else "LNA disabled!")
 
-    def selectComponent(self, components_list, prompt, may_be_not_installed = False):
+    def __selectComponent(self, components_list, prompt, may_be_not_installed = False):
         while True:
             unique_case_styles = sorted(set(component.case_style for component in components_list))
             
@@ -176,18 +176,19 @@ class UserInterface:
         device = Device(selected_board, self.log_filename)
 
         for i in range(device.DEVICE_TYPE_MAPPING[selected_board][0]):
-            selected_filter = self.selectComponent(filter_objects, f"Choose filter case for filter {i + 1} from {device.DEVICE_TYPE_MAPPING[selected_board][0]}:", True)
+            selected_filter = self.__selectComponent(filter_objects, f"Choose filter case for filter {i + 1} from {device.DEVICE_TYPE_MAPPING[selected_board][0]}:", True)
             if selected_filter is None:
                 return None
             device.filters.append(selected_filter)
 
+        # We check that there is information about at least one filter installed on the board
         if self.__noValidFilters(device.filters):
             self.displayInfo("No information about the filters used! "
                              "Create a new configuration or load an existing one!")
             return None
 
         if "LNA" in selected_board:
-            selected_amplifier = self.selectComponent(amplifier_objects, "Choose amplifier case:")
+            selected_amplifier = self.__selectComponent(amplifier_objects, "Choose amplifier case:")
             if selected_amplifier is None:
                 return None
             device.lna.append(selected_amplifier)
