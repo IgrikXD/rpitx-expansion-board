@@ -20,7 +20,6 @@ CONFIGS_DIR = f"{APPLICATION_DIR}/SavedConfiguration/"
 APPLICATION_TITLE = "rpitx-expansion-board control application"
 FAREWELL_MESSAGE = "Thanks for using rpitx-expansion-board project!"
 CONFIGURATION_CREATED_ABORTED = "Configuration creation aborted!"
-NOT_INSTALLED_ITEM = "<Not installed>"
 
 class UserInterface:
 
@@ -144,6 +143,7 @@ class UserInterface:
         while True:
             unique_case_styles = sorted(set(component.case_style for component in components_list))
             
+            NOT_INSTALLED_ITEM = "<Not installed>"
             if may_be_not_installed:
                 unique_case_styles.insert(0, NOT_INSTALLED_ITEM)
             
